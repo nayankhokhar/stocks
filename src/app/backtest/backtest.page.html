@@ -1,13 +1,63 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>backtest</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="container">
+  <h1>Backtest Application</h1>
+  <input type="file" (change)="onFileChange($event)" accept=".xlsx" />
+  
+  <div *ngIf="backtestResult">
+    <h2>Backtest Results</h2>
+    <p><strong>Total Trades:</strong> {{ backtestResult.totalTrades }}</p>
+    <p><strong>Total Profit:</strong> {{ backtestResult.totalProfit.toFixed(2) }} USD</p>
+    <p><strong>Win Rate:</strong> {{ backtestResult.winRate.toFixed(2) }}%</p>
+    <p><strong>Max Drawdown:</strong> {{ backtestResult.maxDrawdown.toFixed(2) }} USD</p>
+    <p><strong>Completed Cycles:</strong> {{ buyCompletedCycle }}</p>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">backtest</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+    <h3>Trade History</h3>
+    <table class="trade-table">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Type</th>
+          <th>Open Price</th>
+          <th>Close Price</th>
+          <th>Lot Size</th>
+          <th>SL</th>
+          <th>TP</th>
+          <th>Open Time</th>
+          <th>Close Time</th>
+          <th>Profit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let trade of backtestResult.tradeHistory">
+          <tr *ngIf="!trade.isCycleEnd">
+            <td>{{ trade.ticket }}</td>
+            <td>{{ trade.type }}</td>
+            <td>{{ trade.openPrice.toFixed(2) }}</td>
+            <td>{{ trade.closePrice.toFixed(2) }}</td>
+            <td>{{ trade.lotSize.toFixed(2) }}</td>
+            <td>{{ trade.stopLoss.toFixed(2) }}</td>
+            <td>{{ trade.takeProfit.toFixed(2) }}</td>
+            <td>{{ trade.openTime | date:'medium' }}</td>
+            <td>{{ trade.closeTime | date:'medium' }}</td>
+            <td>{{ trade.profit.toFixed(2) }}</td>
+          </tr>
+          <tr *ngIf="trade.isCycleEnd" [ngClass]="{'cycle-end': true, 'highlight-cycle': trade.cycleNumber === 2 || trade.cycleNumber === 3 || trade.cycleNumber === 4 || trade.cycleNumber === 5 || trade.cycleNumber === 6}">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><strong>Cycle {{ trade.cycleNumber }} Completed - Profit: {{ trade.cycleProfit.toFixed(2) }} USD</strong></td>
+          </tr>
+          <!-- Add an extra blank row for visual separation -->
+          <tr *ngIf="trade.isCycleEnd" class="spacer-row">
+            <td colspan="10"></td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</div>

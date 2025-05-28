@@ -1,0 +1,42 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.trade-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.trade-table th, .trade-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.trade-table th {
+  background-color: #f2f2f2;
+}
+
+.trade-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.cycle-end {
+  background-color: #e0e0e0;
+  font-style: italic;
+}
+
+.highlight-cycle {
+  background-color: #d0d0ff; /* Light blue to highlight specific cycles */
+  border-top: 2px solid #000; /* Thicker border for separation */
+  border-bottom: 2px solid #000;
+}
+
+.spacer-row {
+  height: 10px; /* Add spacing to create a blank line effect */
+  background-color: transparent;
+  border: none; /* Remove borders for the spacer row */
+}
