@@ -1,0 +1,26 @@
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: max-content;
+  /* Makes table extend beyond parent if needed */
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  white-space: nowrap;
+  /* Prevents content from wrapping */
+  padding: 10px;
+}
+
+.sticky-col {
+  position: sticky;
+  left: 0;
+  /* or any color matching your theme */
+  z-index: 2;
+  /* ensures it stays above other cells */
+}
