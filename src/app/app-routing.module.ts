@@ -4,7 +4,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'backtest',
+    redirectTo: 'stocks',
     pathMatch: 'full'
   },
   {
@@ -15,6 +15,20 @@ const routes: Routes = [
     path: 'backtest',
     loadChildren: () => import('./backtest/backtest.module').then( m => m.BacktestPageModule)
   },
+  {
+    path: 'portfolio',
+    loadChildren: () => import('./portfolio/portfolio.module').then( m => m.PortfolioPageModule)
+  },
+  {
+    path: 'insider-trading',
+    loadChildren: () => import('./insider-trading/insider-trading.module').then( m => m.InsiderTradingPageModule)
+  },
+  {
+    path: 'stocks',
+    loadChildren: () => import('./stocks/stocks.module').then( m => m.StocksPageModule)
+  },
+
+
 
 
 ];

@@ -21,6 +21,7 @@ export class AllStocksPage implements OnInit {
   // Trident
   stocks: any = [];
   stocksApi: any = [
+
     // Done: Agricultural: Pesticides & Agrochemicals
     // { "no": 1, "fundamental": "DP04", "type": "bse", "history_price": "507717", "shareholding": "1774.0", "revenue_type": "S", "on_watch": true, "note": "Manufactures of herbicides, insecticides, fungicides, 11 R&D labs" },
     // { "no": 0, "fundamental": "NAL", "type": "bse", "history_price": "544100", "shareholding": "74102.0", "revenue_type": "S", "on_watch": true, "note": "Soil health management, crop nutrition and crop protection products, Newly Listed" },
@@ -124,19 +125,13 @@ export class AllStocksPage implements OnInit {
     // { "no": "2", "fundamental": "TPC", "type": "nse", "history_price": "TATAPOWER", "shareholding": "554.0", "revenue_type": "C", "on_watch": true, "note": "Aims to achieve 100% clean energy, Transmission & Distribution (62%), Thermal & Hydro Power Generation (24%), Renewables (13%)" },
     // { "no": "3", "fundamental": "SA13", "type": "nse", "history_price": "WAAREERTL", "shareholding": "42529.0", "revenue_type": "C", "on_watch": true, "note": "12 GW, Chikhli, Surat and Umbergaon in Gujarat" },
     // { "no": "0", "fundamental": "SEP02", "type": "nse", "history_price": "SAMPANN", "shareholding": "41535.0", "revenue_type": "C", "on_watch": true, "note": "800 KW, Non-Conventional Energy:5%, Reclaimed Rubber Division:95%" },
-    // { "no": "0", "fundamental": "NGE", "type": "nse", "history_price": "NTPCGREEN", "shareholding": "94008.0", "revenue_type": "C", "on_watch": true, "note": "26,071 MW" },
-    // { "no": "0", "fundamental": "IEE", "type": "nse", "history_price": "IEX", "shareholding": "70961.0", "revenue_type": "C", "on_watch": false, "note": "Gas Exchange, Carbon Exchange" },
-    // { "no": "1", "fundamental": "NTP", "type": "nse", "history_price": "NTPC", "shareholding": "12001.0", "revenue_type": "C", "on_watch": false, "note": "Using Coal, 75.958 GW, Coal:59.7GW, Gas:6.5GW, Hydro:3.7GW, Renewables:3.3GW, Largest power generating company in India" },
     // { "no": "0", "fundamental": "AP26", "type": "nse", "history_price": "ADANIPOWER", "shareholding": "17808.0", "revenue_type": "C", "on_watch": false, "note": "Using Coal, Operational capacity: 17,550 MW, Under-construction projects: 4,520 MW, Under-construction projects: 4,520 MW, Total target capacity:** 30,670 MW by 2032" },
     // { "no": "", "fundamental": "PGC", "type": "nse", "history_price": "POWERGRID", "shareholding": "5455.0", "revenue_type": "C", "on_watch": false, "note": "Transmission (95%), Telecom Business (2%), Consultancy Services & Other (3%), OB:86,700, Renewable Energy, Battery Energy Storage Systems, Green Hydrogen, Largest electric power transmission company" },
-    // { "no": "", "fundamental": "N07", "type": "nse", "history_price": "NHPC", "shareholding": "12584.0", "revenue_type": "C", "on_watch": false, "note": "7,233 MW" },
     // { "no": "", "fundamental": "BFU", "type": "nse", "history_price": "BFUTILITIE", "shareholding": "8037.0", "revenue_type": "C", "on_watch": false, "note": "14.65 MW, Wind Mills, 226 Cr. in mutual funds" },
     // { "no": "", "fundamental": "CES", "type": "nse", "history_price": "CESC", "shareholding": "99.0", "revenue_type": "C", "on_watch": false, "note": " 2,140 MW, RPSG" },
     // { "no": "", "fundamental": "ADANI54145", "type": "nse", "history_price": "ADANIGREEN", "shareholding": "70666.0", "revenue_type": "C", "on_watch": false, "note": "64,858 Debt, 10.9 GW, 11 GW under execution, 2nd largest Solar PV developer in the world" },
 
     // Done: Finance: Finance Term Lending
-    // { "no": "1", "fundamental": "PFC02", "type": "nse", "history_price": "PFC", "shareholding": "12068.0", "revenue_type": "C", "on_watch": true, "note": "Financial assistance to the Indian power sector" },
-    // { "no": "2", "fundamental": "REC02", "type": "nse", "history_price": "RECLTD", "shareholding": "18075.0", "revenue_type": "C", "on_watch": true, "note": "Financing projects in the complete power sector" },
     // { "no": "3", "fundamental": "IRF", "type": "nse", "history_price": "IRFC", "shareholding": "12854.0", "revenue_type": "S", "on_watch": true, "note": "Acquisition / creation of assets, leased out to the Indian Railways" },
     // { "no": "", "fundamental": "MFS09", "type": "nse", "history_price": "MASFIN", "shareholding": "38599.0", "revenue_type": "S", "on_watch": false, "note": "" },
     // { "no": "", "fundamental": "SCN", "type": "nse", "history_price": "SATIN", "shareholding": "16093.0", "revenue_type": "S", "on_watch": false, "note": "" },
@@ -196,7 +191,6 @@ export class AllStocksPage implements OnInit {
     // { "main_sector": "Agri", "sub_sector": "Agriculture", "fundamental": "DCS03", "type": "nse", "history_price": "DHANLAXMI", "shareholding": "93634.0", "revenue_type": "S", "company": "Dhanlaxmi Crop Science", "on_watch": true },
     // { "main_sector": "Agri", "sub_sector": "Food Processing", "fundamental": "GRM01", "type": "nse", "history_price": "GRMOVER", "shareholding": "13554.0", "revenue_type": "S", "company": "GRM Overseas", "on_watch": false },
 
-    // { "main_sector": "Aviation", "sub_sector": "Aerospace & Defence", "fundamental": "HAL", "type": "nse", "history_price": "HAL", "shareholding": "12030.0", "revenue_type": "S", "company": "Hindustan Aeronautics", "on_watch": true },
     // { "main_sector": "Aviation", "sub_sector": "Aerospace & Defence", "fundamental": "UAM", "type": "nse", "history_price": "UNIMECH", "shareholding": "93631.0", "revenue_type": "S", "company": "Unimech Aerospace and Manufacturing", "on_watch": false },
 
     // { "main_sector": "Banks", "sub_sector": "Bank - Private", "fundamental": "IIB", "type": "nse", "history_price": "INDUSINDBK", "shareholding": "5531.0", "revenue_type": "S", "company": "IndusInd Bank", "on_watch": true },
@@ -258,114 +252,57 @@ export class AllStocksPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.fetchStockData();
+    // this.fetchStockData();
+    // setInterval(() => {
+      this.fetchStockData();
+    // }, 2000);
   }
 
   fetchStockData() {
-    this.stocksApi.forEach((stock: any) => {
+    // 1. Build an array of all requests (one per stock)
+    const requests = this.stocksApi.map((stock: any) => {
       const priceApiUrl = `https://priceapi.moneycontrol.com/pricefeed/${stock.type}/equitycash/${stock.fundamental}`;
-      const corporateActionUrl = `https://api.moneycontrol.com/mcapi/v1/stock/corporate-action?deviceType=W&scId=${stock.fundamental}&section=d&start=0&limit=12`;
-      const shareholdingPatternUrl = `https://aogapi-prod.angelone.in/shareHoldingPattern?co_code=${stock.shareholding}`;
-      const yearlyRevenueUrl = `https://www.moneycontrol.com/mc/widget/mcfinancials/getFinancialData?classic=true&device_type=desktop&referenceId=income&requestType=${stock.revenue_type}&scId=${stock.fundamental}&frequency=12`;
-      const quarterlyRevenueUrl = `https://www.moneycontrol.com/mc/widget/mcfinancials/getFinancialData?classic=true&device_type=desktop&referenceId=income&requestType=${stock.revenue_type}&scId=${stock.fundamental}&frequency=3`;
-      const yearlyBalanceSheetUrl = `https://www.moneycontrol.com/mc/widget/mcfinancials/getFinancialData?classic=true&device_type=desktop&referenceId=balance-sheet&requestType=${stock.revenue_type}&scId=${stock.fundamental}&frequency=12`;
-      const yearlyCashFlowUrl = `https://www.moneycontrol.com/mc/widget/mcfinancials/getFinancialData?classic=true&device_type=desktop&referenceId=cash-flow&requestType=${stock.revenue_type}&scId=${stock.fundamental}&frequency=12`;
+      return this.http.get<any>(priceApiUrl).pipe(
+        map(priceData => {
+          // put your value extraction here exactly as before
+          if (!priceData?.data) return null;
 
-      forkJoin({
-        priceData: this.http.get<any>(priceApiUrl),
-        shareholdingPattern: this.http.get<any>(shareholdingPatternUrl),
-        corporateActionData: this.http.get<any>(corporateActionUrl),
-        yearlyRevenue: this.getYearlyRevenue(yearlyRevenueUrl),
-        quarterlyRevenue: this.getYearlyRevenue(quarterlyRevenueUrl),
-        yearlyBalanceSheet: this.getYearlyBalanceSheetData(yearlyBalanceSheetUrl),
-        yearlyCashFlow: this.getCashFlowData(yearlyCashFlowUrl),
-      }).subscribe(
-        ({ priceData, corporateActionData, yearlyRevenue, quarterlyRevenue, yearlyBalanceSheet, yearlyCashFlow, shareholdingPattern }) => {
-          if (priceData && priceData.data) {
-            const dividends = corporateActionData?.data?.dividends || [];
+          const currentPrice = priceData.data.pricecurrent && priceData.data.pricecurrent != "NT*" ? Number(priceData.data.pricecurrent).toFixed(2) : "";
+          const high52 = priceData.data['52H'] && priceData.data['52H'] != "-" ? priceData.data['52H'] : "";
+          const low52 = priceData.data['52L'] && priceData.data['52L'] != "-" ? priceData.data['52L'] : "";
+          const percentFrom52High = high52 ? ((Number(currentPrice) - high52) / high52 * 100).toFixed(2) : "";
+          const percentFrom52Low = low52 ? ((Number(currentPrice) - low52) / low52 * 100).toFixed(2) : "";
 
-            // Process dividends (existing code remains the same)
-            let dividendsList = [];
-            if (dividends.length > 0) {
-              dividendsList = dividends.map((div: any) => {
-                const exDate = div.effective_date && div.effective_date !== "-" ? div.effective_date : div.announce_date;
-                return {
-                  "DIV_EX_DATE": exDate,
-                  "DIV_AMOUNT": parseFloat(div.dividend_amount) || 0
-                };
-              });
-            }
-
-            // Fetch stock price on dividend dates (existing code remains the same)
-            let priceRequests = [];
-            if (dividendsList.length > 0) {
-              priceRequests = dividendsList.map((div: any) => {
-                const exDate = new Date(div.DIV_EX_DATE);
-                const exDatePrevDay = (Math.floor(exDate.getTime() / 1000));
-
-                let historyApiUrl = "";
-                if (stock.history_price == "ARE" || stock.history_price == "GRMOVER") {
-                  historyApiUrl = `https://priceapi.moneycontrol.com/techCharts/indianMarket/stock/history?symbol=${stock.history_price}&resolution=1D&from=${exDatePrevDay}&to=${exDatePrevDay}&countback=2&currencyCode=INR`;
-                } else {
-                  historyApiUrl = `https://priceapi.moneycontrol.com/techCharts/history?symbol=${stock.history_price}&resolution=1D&from=${exDatePrevDay}&to=${exDatePrevDay}`;
-                }
-
-                return this.http.get<any>(historyApiUrl).pipe(
-                  map(res => {
-                    const closingPrices = res?.o || [];
-                    return closingPrices.length > 0 ? closingPrices[0] : null;
-                  })
-                );
-              });
-            }
-
-            forkJoin(priceRequests.length > 0 ? priceRequests : [of(null)]).subscribe((prices: any) => {
-              // Attach prices to dividend list (existing code remains the same)
-              dividendsList.forEach((div: any, index: any) => {
-                div["SHARE_PRICE"] = prices[index] || "N/A";
-                div["DIV_PERCENTAGE"] = Number((div["SHARE_PRICE"] && div["SHARE_PRICE"] !== "N/A")
-                  ? ((div["DIV_AMOUNT"] / div["SHARE_PRICE"]) * 100).toFixed(2)
-                  : "N/A");
-              });
-
-              const currentPrice = priceData.data.pricecurrent && priceData.data.pricecurrent != "NT*" ? Number(priceData.data.pricecurrent).toFixed(2) : "";
-              const high52 = priceData.data['52H'] && priceData.data['52H'] != "-" ? priceData.data['52H'] : "";
-              const low52 = priceData.data['52L'] && priceData.data['52L'] != "-" ? priceData.data['52L'] : "";
-              const percentFrom52High = high52 ? ((Number(currentPrice) - high52) / high52 * 100).toFixed(2) : "";
-              const percentFrom52Low = low52 ? ((Number(currentPrice) - low52) / low52 * 100).toFixed(2) : "";
-
-              // Merge balance sheet data with yearly revenue
-              const mergedYearlyRevenue = yearlyRevenue.map((revenueYear: any, index: any) => ({
-                ...revenueYear,
-                ...yearlyBalanceSheet[index],
-                ...yearlyCashFlow[index]
-              }));
-
-              this.stocks.push({
-                "YM": stock.revenue_type,
-                "NSE": priceData.data.NSEID,
-                "COMPANY_NAME": priceData.data.SC_FULLNM,
-                "MAIN_SECTOR": priceData?.data?.main_sector,
-                "SUB_SECTOR": priceData?.data?.newSubsector,
-                "CURRENT_PRICE": currentPrice,
-                "52H": high52,
-                "52L": low52,
-                "52H_PERCENTAGE": percentFrom52High,
-                "52L_PERCENTAGE": percentFrom52Low,
-                "BOOK_VALUE": priceData.data.BVCONS ? Number(priceData.data.BVCONS).toFixed(2) : "",
-                "MARKET_CAP": priceData.data.MKTCAP && priceData.data.MKTCAP != "-" ? Number(priceData.data.MKTCAP).toFixed(2) : "",
-                "PE_RATIO": priceData.data.PE && priceData.data.PE != "-" ? Number(priceData.data.PE).toFixed(2) : "",
-                "SECTOR_PE": priceData.data.IND_PE ? Number(priceData.data.IND_PE) : "",
-                "PB_RATIO": priceData.data.PB && priceData.data.PB != "-" ? Number(priceData.data.PB).toFixed(2) : "",
-                "DIVIDENDS": dividendsList,
-                "YEARLY_REVENUE": mergedYearlyRevenue,
-                "QARTERLY_REVENUE": quarterlyRevenue,
-                "SHAREHOLDING_PATTERN": shareholdingPattern?.data,
-              });
-            });
+          return {
+            "YM": stock.revenue_type,
+            "NSE": priceData.data.NSEID,
+            "COMPANY_NAME": priceData.data.SC_FULLNM,
+            "MAIN_SECTOR": priceData?.data?.main_sector,
+            "SUB_SECTOR": priceData?.data?.newSubsector,
+            "CURRENT_PRICE": currentPrice,
+            "52H": high52,
+            "52L": low52,
+            "52H_PERCENTAGE": percentFrom52High,
+            "52L_PERCENTAGE": percentFrom52Low,
+            "BOOK_VALUE": priceData.data.BVCONS ? Number(priceData.data.BVCONS).toFixed(2) : "",
+            "MARKET_CAP": priceData.data.MKTCAP && priceData.data.MKTCAP != "-" ? Number(priceData.data.MKTCAP).toFixed(2) : "",
+            "PE_RATIO": priceData.data.PE && priceData.data.PE != "-" ? Number(priceData.data.PE).toFixed(2) : "",
+            "SECTOR_PE": priceData.data.IND_PE ? Number(priceData.data.IND_PE) : "",
+            "PB_RATIO": priceData.data.PB && priceData.data.PB != "-" ? Number(priceData.data.PB).toFixed(2) : "",
+            // add more fields as needed
           }
-        }
+        })
       );
+    });
+
+    // 2. Make ALL the requests and handle at once
+    forkJoin(requests).subscribe((results: any) => {
+      // Remove any nulls (failed fetches)
+      this.stocks = results.filter((r: any) => r !== null);
+      // 3. Sort by MARKET_CAP (descending)
+      this.stocks.sort((a: any, b: any) => (Number(a.MARKET_CAP) || 0) - (Number(b.MARKET_CAP) || 0));
+      // 4. Optional: force new reference if needed (not usually needed after assignment):
+      this.stocks = [...this.stocks];
     });
   }
 

@@ -1,0 +1,27 @@
+<ion-content [fullscreen]="true" color="dark">
+  <div class="m-3">
+    <table class="table table-dark table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Total Qty</th>
+          <th>Avg Price</th>
+          <th>Total Invested Amount</th>
+          <th>Total Dividend Received</th>
+          <th>Upcoming Dividends</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of portfolio">
+          <td>{{ item.name }}</td>
+          <td class="text-end">{{ item.totalQty }}</td>
+          <td class="text-end">{{ item.avgPrice }}</td>
+          <td class="text-end">{{ item.totalInvestment }}</td>
+          <td class="text-end">{{ item.totalDividend }} - {{ item.totalDividendPercentage }}</td>
+          <td>{{ item.upcoming_dividend_date }} : {{item.upcoming_dividend_percentage}}% :
+            {{item.upcoming_dividend_price_per_share}} : {{item.upcoming_dividend_total_dividends}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ion-content>
