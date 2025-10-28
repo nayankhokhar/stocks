@@ -36,7 +36,7 @@
             <th scope="col" class="text-center">Yearly Results</th>
             <th scope="col" class="text-center">Balance Sheet</th>
             <th scope="col" class="text-center">Cash Flow</th>
-            <!-- <th scope="col" class="text-center">Dividend</th> -->
+            <th scope="col" class="text-center">Dividend</th>
             <th scope="col" class="text-center">Dividend Yearly</th>
           </tr>
         </thead>
@@ -187,8 +187,8 @@
                   <thead>
                     <tr>
                       <th class="pad-1">Date</th>
-                      <th class="pad-1">O.Income</th>
                       <th class="pad-1">Income</th>
+                      <th class="pad-1">O.Income</th>
                       <th class="pad-1">I.G.</th>
                       <th class="pad-1">Interest</th>
                       <th class="pad-1">Net Profit</th>
@@ -202,11 +202,11 @@
                       <td class=" pad-1">
                         {{ item['date'] }}
                       </td>
-                      <td class="pad-1" [style.color]="item.otherIncomeColor">
-                        {{item.otherIncome | number }}
-                      </td>
                       <td class="pad-1" [style.color]="item.totalIncomeColor">
                         {{item.totalIncome | number }}
+                      </td>
+                      <td class="pad-1" [style.color]="item.otherIncomeColor">
+                        {{item.otherIncome | number }}
                       </td>
                       <td class="pad-1"
                         [ngStyle]="i === (data.yearlyResultC && data.yearlyResultC.length > 0 ? data.yearlyResultC : data.yearlyResultS).length - 1 ? {} 
@@ -319,7 +319,7 @@
               </td>
 
               <!-- Dividend -->
-              <!-- <td class="text-end p-0">
+              <td class="text-end p-0">
                 <table class="table table-striped table-bordered table-sm text-end mb-0">
                   <thead>
                     <tr>
@@ -342,7 +342,7 @@
                     </tr>
                   </tbody>
                 </table>
-              </td> -->
+              </td>
 
               <!-- Dividend Yearly-->
               <td class="text-end p-0">
