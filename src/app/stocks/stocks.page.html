@@ -1,6 +1,17 @@
 <ion-content [fullscreen]="true">
   <div class="row px-3 pt-3">
-    <div class="col-4 offset-8 d-flex justify-content-end">
+    <div class="col-4 d-flex justify-content-end">
+      <ion-list class="w-100">
+        <ion-item>
+          <ion-select aria-label="Stock Search" label="Search Stock" placeholder="Select Sector" [multiple]="true">
+            <ion-select-option *ngFor="let sector of searchStocksData" [value]="sector">
+              {{ sector.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+    </div>
+    <div class="col-4 d-flex justify-content-end">
       <ion-list class="w-100">
         <ion-item>
           <ion-select aria-label="Sector" label="Sector" placeholder="Select Sector" [multiple]="true"

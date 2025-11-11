@@ -10,6 +10,7 @@ import * as _ from 'lodash';
 })
 export class StocksPage implements OnInit {
   stocks: any = [];
+  searchStocksData: any = [];
   sectors: any[] = [];
   selectedSectors: any[] = [];
 
@@ -25,6 +26,7 @@ export class StocksPage implements OnInit {
     this.http.post<any[]>("http://localhost:8888/getStocks", {
       sector: this.selectedSectors
     }).subscribe((resp) => {
+      this.searchStocksData = resp;
       console.log("resp: ",resp);
     });
   }
