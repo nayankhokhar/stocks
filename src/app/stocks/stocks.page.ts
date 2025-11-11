@@ -21,6 +21,12 @@ export class StocksPage implements OnInit {
     this.http.get<any>("http://localhost:8888/getStocksSector").subscribe((resp) => {
       this.sectors = resp.map((item: any) => item._id);
     });
+
+    this.http.post<any[]>("http://localhost:8888/getStocks", {
+      sector: this.selectedSectors
+    }).subscribe((resp) => {
+      console.log("resp: ",resp);
+    });
   }
 
   onSectorSelect(event: any) {
