@@ -1,15 +1,46 @@
 <ion-content [fullscreen]="true">
   <div class="row px-3 pt-3">
     <div class="col-4 d-flex justify-content-end">
-      <ion-list class="w-100">
-        <ion-item>
-          <ion-select aria-label="Stock Search" label="Search Stock" placeholder="Select Sector" [multiple]="true">
-            <ion-select-option *ngFor="let sector of searchStocksData" [value]="sector">
-              {{ sector.name }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-list>
+      <div class="w-100" style="position: relative;">
+        <ion-list class="w-100">
+          <ion-item>
+            <ion-input 
+              type="text" 
+              placeholder="Type to search stocks..." 
+              [(ngModel)]="searchTerm"
+              (ionInput)="filterStocks($event)"
+              (ionFocus)="showDropdown = true"
+              (ionBlur)="onInputBlur()"
+              clearInput="true">
+            </ion-input>
+          </ion-item>
+        </ion-list>
+        
+        <!-- Dropdown list - positioned below input -->
+        <div *ngIf="showDropdown && filteredSearchStocksData.length > 0" 
+             class="dropdown-list"
+             style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+          <ion-list>
+            <ion-item 
+              *ngFor="let sector of filteredSearchStocksData" 
+              button
+              (click)="selectStock(sector, $event)"
+              [class.item-selected]="isSelected(sector)"
+              lines="none"
+              detail="false"
+              style="cursor: pointer; --background-hover: var(--ion-color-light, #f4f5f8); --background-activated: var(--ion-color-light, #f4f5f8); --padding-start: 16px; --padding-end: 16px; --min-height: 48px;">
+              <ion-label style="font-size: 16px;">{{ sector.name }}</ion-label>
+              <ion-icon 
+                *ngIf="isSelected(sector)" 
+                name="checkmark" 
+                slot="end"
+                color="primary"
+                style="font-size: 20px; margin-left: 8px;">
+              </ion-icon>
+            </ion-item>
+          </ion-list>
+        </div>
+      </div>
     </div>
     <div class="col-4 d-flex justify-content-end">
       <ion-list class="w-100">
