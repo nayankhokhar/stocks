@@ -10,15 +10,34 @@ interface MfRecord {
 interface YearSummary {
   year: number;
   daysInYear: number;
-  investmentTill: number;
-  unitsTill: number;
+  investmentTill: number;       // daily SIP invested till year-end
+  unitsTill: number;            // daily SIP units till year-end
   navAtYearEnd: number;
   currentValueTill: number;
   growthTill: number;
   growthPctTill: number;
   annualisedReturn: number | null; // SIP XIRR percent
-  dataReturnPct?: number | null;    // percent return inside that year (price change)
-  dataAnnualisedPct?: number | null; // percent annualised (CAGR) for the year
+
+  // data (price) per-year
+  dataStartNav?: number | null;
+  dataEndNav?: number | null;
+  dataReturnPct?: number | null;
+  dataAnnualisedPct?: number | null;
+
+  // monthly SIP fields
+  monthlyInvestmentTill?: number;
+  monthlyUnitsTill?: number;
+  monthlyCurrentValueTill?: number;
+  monthlyGrowthTill?: number;
+  monthlyAnnualisedReturn?: number | null;
+}
+
+interface MonthlyRecord {
+  year: number;
+  month: number; // 1-12
+  date: string;  // first date used for month in dd-mm-yyyy
+  nav: number;
+  monthlyUnits: number;
 }
 
 @Component({
@@ -31,7 +50,10 @@ export class MutualFundPage implements OnInit {
   records: MfRecord[] = [];
   investPerDay = 100;
 
-  // totals
+  // monthly SIP config
+  investPerMonth = 2000;
+
+  // totals (daily SIP)
   totalDays = 0;
   totalInvested = 0;
   totalUnits = 0;
@@ -39,6 +61,16 @@ export class MutualFundPage implements OnInit {
   currentValue = 0;
   totalGain = 0;
   gainPercent = 0;
+
+  // monthly SIP results
+  monthlyRecords: MonthlyRecord[] = [];
+  monthlyTotalMonths = 0;
+  monthlyTotalInvested = 0;
+  monthlyTotalUnits = 0;
+  monthlyCurrentValue = 0;
+  monthlyTotalGain = 0;
+  monthlyGainPercent = 0;
+  monthlyAnnualisedReturn: number | null = null;
 
   yearSummaries: YearSummary[] = [];
   portfolioAnnualisedReturn: number | null = null;
@@ -50,6 +82,9 @@ export class MutualFundPage implements OnInit {
   lastDate = '';
   dataTotalReturn: number | null = null;      // percent
   dataAnnualisedReturn: number | null = null; // percent (CAGR)
+
+  // fund meta from resp.meta
+  fundMeta: any = null;
 
   loading = true;
   error: string | null = null;
@@ -64,7 +99,8 @@ export class MutualFundPage implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.http.get<any>('https://api.mfapi.in/mf/120621?startDate=2020-11-26&endDate=2025-11-21')
+    // change MF code / date range as needed
+    this.http.get<any>('https://api.mfapi.in/mf/120621?startDate=2000-11-26&endDate=2025-11-21')
       .subscribe({
         next: (resp) => {
           if (!resp || !resp.data || !Array.isArray(resp.data)) {
@@ -72,6 +108,9 @@ export class MutualFundPage implements OnInit {
             this.loading = false;
             return;
           }
+
+          // store meta for UI
+          this.fundMeta = resp.meta || null;
 
           // copy into local array (latest-first expected)
           this.records = resp.data.map((r: any) => ({
@@ -89,7 +128,7 @@ export class MutualFundPage implements OnInit {
             };
           });
 
-          // compute SIP totals
+          // compute SIP totals (daily)
           this.totalDays = this.records.length;
           this.totalInvested = this.totalDays * this.investPerDay;
           this.totalUnits = this.records.reduce((acc, it) => acc + (it.dailyUnitPurchase || 0), 0);
@@ -101,19 +140,24 @@ export class MutualFundPage implements OnInit {
           this.totalGain = this.currentValue - this.totalInvested;
           this.gainPercent = this.totalInvested > 0 ? (this.totalGain / this.totalInvested) * 100 : 0;
 
-          // build year-wise summary (SIP) and include data returns per year
-          this.yearSummaries = this.buildYearlySummaryWithDataReturns(this.records, this.investPerDay);
+          // build year-wise summary (SIP) and include data returns per year and monthly snapshots
+          this.yearSummaries = this.buildYearlySummaryWithDataAndMonthly(this.records, this.investPerDay, this.investPerMonth);
 
-          // compute portfolio annualised return using XIRR (SIP)
+          // compute portfolio annualised return using XIRR (SIP daily)
           this.portfolioAnnualisedReturn = this.computePortfolioAnnualisedReturn(this.records, this.investPerDay, this.currentValue, this.records[0]?.date);
 
           // compute data-only overall returns (buy 1 unit at first NAV -> hold to last NAV)
           this.computeDataOverallReturns(this.records);
 
+          // compute monthly SIP results (overall)
+          this.computeMonthlySip(this.records, this.investPerMonth);
+
           this.loading = false;
+
+          console.log("monthlyRecords: ", this.monthlyRecords);
+          console.log("yearSummaries: ", this.yearSummaries);
         },
         error: (err) => {
-          console.error(err);
           this.error = 'Failed to fetch data';
           this.loading = false;
         }
@@ -121,15 +165,25 @@ export class MutualFundPage implements OnInit {
   }
 
   /**
-   * Build year-wise cumulative summary (SIP) and attach data-only returns per year (price returns).
+   * Build year-wise cumulative summary (SIP) and attach data-only returns per year and monthly SIP cumulative snapshots.
    */
-  private buildYearlySummaryWithDataReturns(records: MfRecord[], investPerDay = 100): YearSummary[] {
+  private buildYearlySummaryWithDataAndMonthly(records: MfRecord[], investPerDay = 100, investPerMonth = 100): YearSummary[] {
     if (!records || records.length === 0) return [];
 
-    // oldest-first order for cumulative sums and per-year first/last
+    // oldest-first for chronological processing
     const oldestFirst = [...records].reverse();
 
-    // track per-year values
+    // --- prepare monthly first-of-month list (chronological) ---
+    const monthMap = new Map<string, MfRecord>();
+    for (const r of oldestFirst) {
+      const parts = (r.date || '').split('-');
+      if (parts.length !== 3) continue;
+      const key = `${parts[2]}-${parts[1]}`; // yyyy-mm
+      if (!monthMap.has(key)) monthMap.set(key, r); // first chronological gets stored
+    }
+    const monthlyFirsts = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(e => e[1]);
+
+    // --- per-year daily-SIP cumulative snapshots and data per-year first/last NAV ---
     const map = new Map<number, {
       daysInYear: number;
       cumulativeDays: number;
@@ -167,21 +221,22 @@ export class MutualFundPage implements OnInit {
       entry.cumulativeUnits = cumulativeUnits;
 
       if (entry.firstNavInYear === null) {
-        entry.firstNavInYear = nav; // first chronological in that year
+        entry.firstNavInYear = nav;
       }
-      // overwrite lastNavInYear each time, so it becomes the last one in the year
       entry.lastNavInYear = nav;
       entry.lastDateOfYear = r.date;
 
       map.set(year, entry);
     }
 
-    // build summaries ascending year order
+    // build summaries in ascending year order
     const years = Array.from(map.keys()).sort((a, b) => a - b);
     const summaries: YearSummary[] = [];
 
     for (const y of years) {
       const snap = map.get(y)!;
+
+      // daily SIP cumulative
       const investmentTill = snap.cumulativeDays * investPerDay;
       const unitsTill = snap.cumulativeUnits;
       const navAtYearEnd = snap.lastNavInYear || 0;
@@ -189,7 +244,7 @@ export class MutualFundPage implements OnInit {
       const growthTill = currentValueTill - investmentTill;
       const growthPctTill = investmentTill > 0 ? (growthTill / investmentTill) * 100 : 0;
 
-      // SIP XIRR (annualised) up to year-end
+      // SIP XIRR up to year-end
       const flowsSip: { date: string; amount: number }[] = [];
       for (const r of oldestFirst) {
         const p = r.date.split('-');
@@ -204,23 +259,64 @@ export class MutualFundPage implements OnInit {
       // Data (price) returns inside the year
       let dataReturnPct: number | null = null;
       let dataAnnualisedPct: number | null = null;
-      if (snap.firstNavInYear !== null && snap.lastNavInYear !== null && snap.firstNavInYear > 0) {
-        dataReturnPct = ((snap.lastNavInYear - snap.firstNavInYear) / snap.firstNavInYear) * 100;
+      const dataStartNav = snap.firstNavInYear;
+      const dataEndNav = snap.lastNavInYear;
+      if (dataStartNav !== null && dataEndNav !== null && dataStartNav > 0) {
+        dataReturnPct = ((dataEndNav - dataStartNav) / dataStartNav) * 100;
 
-        // find first date string for this year (chronological)
         const firstDateStr = this.findFirstDateInYear(oldestFirst, y);
         if (firstDateStr) {
           const dFirst = this.parseDateFromDDMMYYYY(firstDateStr).getTime();
           const dLast = this.parseDateFromDDMMYYYY(snap.lastDateOfYear).getTime();
           const yearsFraction = Math.max((dLast - dFirst) / (1000 * 3600 * 24 * 365), 0);
           if (yearsFraction > 0) {
-            dataAnnualisedPct = (Math.pow((snap.lastNavInYear / snap.firstNavInYear), 1 / yearsFraction) - 1) * 100;
+            dataAnnualisedPct = (Math.pow((dataEndNav / dataStartNav), 1 / yearsFraction) - 1) * 100;
           } else {
-            dataAnnualisedPct = null; // single-day year or zero duration
+            dataAnnualisedPct = null;
           }
         } else {
           dataAnnualisedPct = null;
         }
+      }
+
+      // --- Monthly cumulative up to year-end ---
+      // months with yyyy <= y from monthlyFirsts
+      const monthsUpToYear = monthlyFirsts.filter(m => {
+        const parts = (m.date || '').split('-');
+        if (parts.length !== 3) return false;
+        const my = parseInt(parts[2], 10);
+        return my <= y;
+      });
+
+      let monthlyUnitsTill = 0;
+      let monthlyInvestmentTill = 0;
+      let lastMonthlyDateForYear = '';
+      for (const m of monthsUpToYear) {
+        const navm = parseFloat(m.nav as any);
+        if (!isFinite(navm) || navm <= 0) continue;
+        monthlyUnitsTill += investPerMonth / navm;
+        monthlyInvestmentTill += investPerMonth;
+        lastMonthlyDateForYear = m.date;
+      }
+      const monthlyCurrentValueTill = monthlyUnitsTill * navAtYearEnd;
+      const monthlyGrowthTill = monthlyCurrentValueTill - monthlyInvestmentTill;
+
+      // monthly XIRR up to year-end
+      let monthlyAnnualisedReturn: number | null = null;
+      if (monthsUpToYear.length > 0) {
+        const flowsMonthly: { date: string; amount: number }[] = [];
+        // chronological monthsUpToYear are already chronological from monthlyFirsts
+        for (const m of monthsUpToYear) {
+          flowsMonthly.push({ date: m.date, amount: -investPerMonth });
+        }
+        // terminal positive on year-end last date
+        const terminalDate = snap.lastDateOfYear || monthsUpToYear[monthsUpToYear.length - 1].date;
+        flowsMonthly.push({ date: terminalDate, amount: monthlyCurrentValueTill });
+
+        const xirrM = this.xirr(flowsMonthly);
+        monthlyAnnualisedReturn = xirrM === null ? null : xirrM * 100;
+      } else {
+        monthlyAnnualisedReturn = null;
       }
 
       summaries.push({
@@ -233,8 +329,17 @@ export class MutualFundPage implements OnInit {
         growthTill,
         growthPctTill,
         annualisedReturn: annualisedReturnSip,
+
+        dataStartNav: dataStartNav || null,
+        dataEndNav: dataEndNav || null,
         dataReturnPct,
-        dataAnnualisedPct
+        dataAnnualisedPct,
+
+        monthlyInvestmentTill,
+        monthlyUnitsTill,
+        monthlyCurrentValueTill,
+        monthlyGrowthTill,
+        monthlyAnnualisedReturn
       });
     }
 
@@ -282,15 +387,60 @@ export class MutualFundPage implements OnInit {
     }
   }
 
-  private findFirstDateInYear(oldestFirst: MfRecord[], year: number): string | null {
+  /**
+   * Compute monthly SIP overall (first NAV of each month).
+   */
+  private computeMonthlySip(records: MfRecord[], investPerMonth: number) {
+    this.monthlyRecords = [];
+    this.monthlyTotalMonths = 0;
+    this.monthlyTotalInvested = 0;
+    this.monthlyTotalUnits = 0;
+    this.monthlyCurrentValue = 0;
+    this.monthlyTotalGain = 0;
+    this.monthlyGainPercent = 0;
+    this.monthlyAnnualisedReturn = null;
+
+    if (!records || records.length === 0) return;
+
+    // oldest-first
+    const oldestFirst = [...records].reverse();
+
+    // first-of-month map
+    const monthMap = new Map<string, MfRecord>();
     for (const r of oldestFirst) {
       const parts = (r.date || '').split('-');
       if (parts.length !== 3) continue;
-      const y = parseInt(parts[2], 10);
-      if (y === year) return r.date;
-      if (y > year) return null; // since oldestFirst sorted, if passed year return null
+      const key = `${parts[2]}-${parts[1]}`;
+      if (!monthMap.has(key)) monthMap.set(key, r);
     }
-    return null;
+
+    const monthlyFirsts = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(e => e[1]);
+
+    for (const r of monthlyFirsts) {
+      const nav = parseFloat(r.nav as any);
+      if (!isFinite(nav) || nav <= 0) continue;
+      const parts = r.date.split('-');
+      const year = parseInt(parts[2], 10);
+      const month = parseInt(parts[1], 10);
+      const units = investPerMonth / nav;
+      this.monthlyRecords.push({ year, month, date: r.date, nav, monthlyUnits: units });
+      this.monthlyTotalUnits += units;
+      this.monthlyTotalInvested += investPerMonth;
+    }
+
+    this.monthlyTotalMonths = this.monthlyRecords.length;
+    this.monthlyCurrentValue = this.monthlyTotalUnits * this.latestNav;
+    this.monthlyTotalGain = this.monthlyCurrentValue - this.monthlyTotalInvested;
+    this.monthlyGainPercent = this.monthlyTotalInvested > 0 ? (this.monthlyTotalGain / this.monthlyTotalInvested) * 100 : 0;
+
+    // monthly flows -> XIRR
+    const flows: { date: string; amount: number }[] = [];
+    for (const m of this.monthlyRecords) flows.push({ date: m.date, amount: -investPerMonth });
+    const terminalDate = this.records[0]?.date || (this.monthlyRecords[this.monthlyRecords.length - 1]?.date);
+    flows.push({ date: terminalDate, amount: this.monthlyCurrentValue });
+
+    const xirrMonthly = this.xirr(flows);
+    this.monthlyAnnualisedReturn = xirrMonthly === null ? null : xirrMonthly * 100;
   }
 
   // ---------- XIRR implementation ----------
@@ -373,6 +523,17 @@ export class MutualFundPage implements OnInit {
   }
 
   // ---------- helpers ----------
+  private findFirstDateInYear(oldestFirst: MfRecord[], year: number): string | null {
+    for (const r of oldestFirst) {
+      const parts = (r.date || '').split('-');
+      if (parts.length !== 3) continue;
+      const y = parseInt(parts[2], 10);
+      if (y === year) return r.date;
+      if (y > year) return null; // since oldestFirst sorted, if passed year return null
+    }
+    return null;
+  }
+
   private parseDateFromDDMMYYYY(s: string): Date {
     const p = (s || '').split('-');
     return new Date(`${p[2]}-${p[1]}-${p[0]}`);

@@ -87,11 +87,11 @@
             <tr class="fw-700">
               <td class="test-start">{{ i + 1 }}</td>
               <td class="test-start">{{ data.totalGreenCount }}</td>
-              <td class="test-start" style="color: green;">{{ data.symbol }} : {{ data.name }}</td>
+              <td class="test-start" style="color: #008000;">{{ data.symbol }} : {{ data.name }}</td>
               <td class="text-end" style="color: royalblue;">{{
                 formatIndianCurrency(data.currentMarketPrice) }}</td>
               <td class="text-end">{{ formatIndianCurrency(data.marketCap) }}</td>
-              <td class="text-end" style="color: red;">{{ formatIndianCurrency(data.last52WeekHigh) }}
+              <td class="text-end" style="color: #ff0000;">{{ formatIndianCurrency(data.last52WeekHigh) }}
                 / {{data.last52WeekHighPer }}</td>
               <td class="text-end" style="color: green;">{{ formatIndianCurrency(data.last52WeekLow) }}
                 / {{data.last52WeekLowPer }}</td>
