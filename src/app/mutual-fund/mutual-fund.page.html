@@ -1,0 +1,207 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>SIP Daily ₹{{ investPerDay }} — Summary</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="fetchData()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card *ngIf="loading">
+    <ion-card-content>Loading...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="error">
+    <ion-card-header><ion-card-title>Error</ion-card-title></ion-card-header>
+    <ion-card-content>{{ error }}</ion-card-content>
+  </ion-card>
+
+  <!-- Totals card -->
+  <ion-card *ngIf="!loading && !error">
+    <ion-card-header>
+      <ion-card-title>Portfolio Summary</ion-card-title>
+      <ion-card-subtitle>
+        Latest NAV: ₹{{ latestNav | number:'1.2-2' }} ({{ records.length ? records[0].date : '-' }})
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <strong>Total Days</strong>
+            <div>{{ totalDays }}</div>
+          </ion-col>
+          <ion-col size="6">
+            <strong>Total Invested</strong>
+            <div>₹{{ totalInvested | number:'1.2-2' }}</div>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="6">
+            <strong>Total Units</strong>
+            <div>{{ totalUnits | number:'1.6-6' }}</div>
+          </ion-col>
+          <ion-col size="6">
+            <strong>Current Value</strong>
+            <div>₹{{ currentValue | number:'1.2-2' }}</div>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="6">
+            <strong>Total Gain</strong>
+            <div>₹{{ totalGain | number:'1.2-2' }}</div>
+          </ion-col>
+          <ion-col size="6">
+            <strong>Gain %</strong>
+            <div>{{ gainPercent | number:'1.2-2' }}%</div>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="12">
+            <strong>Annualised Return (SIP - XIRR)</strong>
+            <div *ngIf="portfolioAnnualisedReturn !== null; else dash">
+              {{ portfolioAnnualisedReturn | number:'1.2-2' }}%
+            </div>
+            <ng-template #dash>-</ng-template>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Data (Buy & Hold) overall returns -->
+  <ion-card *ngIf="!loading && !error">
+    <ion-card-header>
+      <ion-card-title>Data (Buy & Hold) Returns</ion-card-title>
+      <ion-card-subtitle>If you bought 1 unit at first NAV and held to latest NAV</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <strong>First NAV ({{ firstDate || '-' }})</strong>
+            <div>₹{{ firstNav | number:'1.5-5' }}</div>
+          </ion-col>
+          <ion-col size="6">
+            <strong>Latest NAV ({{ lastDate || '-' }})</strong>
+            <div>₹{{ lastNav | number:'1.5-5' }}</div>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="6">
+            <strong>Data Total Return</strong>
+            <div *ngIf="dataTotalReturn !== null">{{ dataTotalReturn | number:'1.2-2' }}%</div>
+            <div *ngIf="dataTotalReturn === null">-</div>
+          </ion-col>
+          <ion-col size="6">
+            <strong>Data Annualised Return (CAGR)</strong>
+            <div *ngIf="dataAnnualisedReturn !== null">{{ dataAnnualisedReturn | number:'1.2-2' }}%</div>
+            <div *ngIf="dataAnnualisedReturn === null">-</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Year-wise summary -->
+  <ion-card *ngIf="!loading && !error && yearSummaries?.length">
+    <ion-card-header>
+      <ion-card-title>Year-wise Cumulative Summary</ion-card-title>
+      <ion-card-subtitle>Units/Investment/Growth up to year-end (with annualised return)</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="table-wrapper">
+        <table class="mf-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Days (Year)</th>
+              <th>Investment Till (₹)</th>
+              <th>Units Till</th>
+              <th>NAV at Year End (₹)</th>
+              <th>Current Value Till (₹)</th>
+              <th>Growth Till (₹)</th>
+              <th>Growth %</th>
+              <th>Annualised Return (SIP)</th>
+              <th>Data Return %</th>
+              <th>Data Annualised %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let y of yearSummaries">
+              <td>{{ y.year }}</td>
+              <td>{{ y.daysInYear }}</td>
+              <td>₹{{ y.investmentTill | number:'1.2-2' }}</td>
+              <td>{{ y.unitsTill | number:'1.6-6' }}</td>
+              <td>{{ y.navAtYearEnd | number:'1.5-5' }}</td>
+              <td>₹{{ y.currentValueTill | number:'1.2-2' }}</td>
+              <td>₹{{ y.growthTill | number:'1.2-2' }}</td>
+              <td>{{ y.growthPctTill | number:'1.2-2' }}%</td>
+              <td>
+                <span *ngIf="y.annualisedReturn !== null; else dash">{{ y.annualisedReturn | number:'1.2-2' }}%</span>
+                <ng-template #dash>-</ng-template>
+              </td>
+              <td>
+                <span *ngIf="y.dataReturnPct !== null; else dash2">{{ y.dataReturnPct | number:'1.2-2' }}%</span>
+                <ng-template #dash2>-</ng-template>
+              </td>
+              <td>
+                <span *ngIf="y.dataAnnualisedPct !== null; else dash3">{{ y.dataAnnualisedPct | number:'1.2-2'
+                  }}%</span>
+                <ng-template #dash3>-</ng-template>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Data table -->
+  <ion-card *ngIf="!loading && !error">
+    <ion-card-header>
+      <ion-card-title>Daily Purchases</ion-card-title>
+      <ion-card-subtitle>Showing {{ records.length }} records (latest first)</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="table-wrapper">
+        <table class="mf-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>NAV (₹)</th>
+              <th>Daily Units</th>
+              <th>Amount Invested (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of records">
+              <td>{{ r.date }}</td>
+              <td>{{ r.nav | number:'1.5-5' }}</td>
+              <td>{{ r.dailyUnitPurchase | number:'1.6-6' }}</td>
+              <td>{{ investPerDay | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td><strong>Totals</strong></td>
+              <td></td>
+              <td><strong>{{ totalUnits | number:'1.6-6' }}</strong></td>
+              <td><strong>₹{{ totalInvested | number:'1.2-2' }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

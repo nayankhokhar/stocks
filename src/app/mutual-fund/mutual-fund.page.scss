@@ -1,0 +1,21 @@
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.mf-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.mf-table th,
+.mf-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ion-color-light-contrast);
+    font-size: 14px;
+}
+
+.mf-table thead th {
+    font-weight: 600;
+    background: transparent;
+}

@@ -27,10 +27,10 @@ const routes: Routes = [
     path: 'stocks',
     loadChildren: () => import('./stocks/stocks.module').then( m => m.StocksPageModule)
   },
-
-
-
-
+  {
+    path: 'mutual-fund',
+    loadChildren: () => import('./mutual-fund/mutual-fund.module').then( m => m.MutualFundPageModule)
+  },
 ];
 
 @NgModule({
