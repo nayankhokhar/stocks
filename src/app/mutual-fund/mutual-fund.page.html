@@ -1,21 +1,80 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Mutual Fund SIP Calculator </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="fetchData()">
-        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content class="ion-padding" style="font-weight: 700;">
+  <!-- --- User Inputs / Controls --- -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Inputs</ion-card-title>
+      <ion-card-subtitle>Change SIP amounts and date range, then press Submit</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <ion-item>
+              <ion-label position="stacked">Invest per day (₹)</ion-label>
+              <ion-input type="number" min="0" [(ngModel)]="investPerDay"></ion-input>
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="6">
+            <ion-item>
+              <ion-label position="stacked">Invest per month (₹)</ion-label>
+              <ion-input type="number" min="0" [(ngModel)]="investPerMonth"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="6">
+            <ion-item>
+              <ion-label position="stacked">Start date</ion-label>
+              <!-- browser date input gives yyyy-mm-dd which suits API -->
+              <input ion-input type="date" [(ngModel)]="startDate" />
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="6">
+            <ion-item>
+              <ion-label position="stacked">End date</ion-label>
+              <input ion-input type="date" [(ngModel)]="endDate" />
+            </ion-item>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="12" style="text-align:right">
+            <ion-button (click)="onSubmit()" fill="solid">Submit</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Fund meta -->
   <ion-card *ngIf="fundMeta && !loading">
     <ion-card-header>
       <ion-card-title>{{ fundMeta.scheme_name || '-' }}</ion-card-title>
       <ion-card-subtitle>{{ fundMeta.fund_house || '-' }}</ion-card-subtitle>
     </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6"><strong>Category</strong>
+            <div>{{ fundMeta.scheme_category || '-' }}</div>
+          </ion-col>
+          <ion-col size="6"><strong>Type</strong>
+            <div>{{ fundMeta.scheme_type || '-' }}</div>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6"><strong>Scheme Code</strong>
+            <div>{{ fundMeta.scheme_code || '-' }}</div>
+          </ion-col>
+          <ion-col size="6"><strong>ISIN (Growth)</strong>
+            <div>{{ fundMeta.isin_growth || '-' }}</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
   </ion-card>
 
   <!-- Comparison summary table: Data vs Daily SIP vs Monthly SIP -->
@@ -76,8 +135,8 @@
                 <div class="muted">₹{{ investPerDay }} / day</div>
               </td>
               <td>₹{{ totalInvested | number:'1.2-2' }}</td>
-              <td>{{ totalUnits | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': currentValue > 0, 'neg': currentValue < 0 }">
+              <td>{{ totalUnits | number:'1.6-6' }}</td>
+              <td [ngClass]="{ 'pos': currentValue > totalInvested, 'neg': currentValue < totalInvested }">
                 ₹{{ currentValue | number:'1.2-2' }}
               </td>
 
@@ -109,8 +168,9 @@
                 <div class="muted">₹{{ investPerMonth }} / month</div>
               </td>
               <td>₹{{ monthlyTotalInvested | number:'1.2-2' }}</td>
-              <td>{{ monthlyTotalUnits | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': monthlyCurrentValue > 0, 'neg': monthlyCurrentValue < 0 }">
+              <td>{{ monthlyTotalUnits | number:'1.6-6' }}</td>
+              <td
+                [ngClass]="{ 'pos': monthlyCurrentValue > monthlyTotalInvested, 'neg': monthlyCurrentValue < monthlyTotalInvested }">
                 ₹{{ monthlyCurrentValue | number:'1.2-2' }}
               </td>
 
@@ -207,7 +267,7 @@
 
               <!-- Daily SIP -->
               <td>₹{{ y.investmentTill | number:'1.2-2' }}</td>
-              <td>{{ y.unitsTill | number:'1.2-2' }}</td>
+              <td>{{ y.unitsTill | number:'1.6-6' }}</td>
               <td [ngClass]="{ 
     'pos': y.currentValueTill > 0, 
     'neg': y.currentValueTill < 0 
@@ -224,7 +284,7 @@
 
               <!-- Monthly SIP -->
               <td>₹{{ y.monthlyInvestmentTill | number:'1.2-2' }}</td>
-              <td>{{ y.monthlyUnitsTill | number:'1.2-2' }}</td>
+              <td>{{ y.monthlyUnitsTill | number:'1.6-6' }}</td>
               <td [ngClass]="{
     'pos': (y?.monthlyCurrentValueTill ?? 0) > 0,
     'neg': (y?.monthlyCurrentValueTill ?? 0) < 0

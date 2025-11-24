@@ -48,10 +48,14 @@ interface MonthlyRecord {
 })
 export class MutualFundPage implements OnInit {
   records: MfRecord[] = [];
-  investPerDay = 100;
 
-  // monthly SIP config
+  // defaults (you can change in the UI)
+  investPerDay = 100;
   investPerMonth = 2000;
+
+  // date range defaults (yyyy-mm-dd)
+  startDate = '';
+  endDate = '';
 
   // totals (daily SIP)
   totalDays = 0;
@@ -92,15 +96,36 @@ export class MutualFundPage implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
+  }
+
+  /** Called from Submit button */
+  onSubmit() {
+    // basic validation
+    if (!this.startDate || !this.endDate) {
+      this.error = 'Please provide both start and end dates.';
+      return;
+    }
+    if (this.startDate > this.endDate) {
+      this.error = 'Start date must be before or equal to end date.';
+      return;
+    }
+    // clear previous error and fetch
+    this.error = null;
     this.fetchData();
   }
 
+  /** Main fetch - uses this.startDate and this.endDate and current invest amounts */
   fetchData() {
     this.loading = true;
     this.error = null;
 
-    // change MF code / date range as needed
-    this.http.get<any>('https://api.mfapi.in/mf/120621?startDate=2000-11-26&endDate=2025-11-21')
+    // API expects yyyy-mm-dd for startDate/endDate params
+    const start = this.startDate;
+    const end = this.endDate;
+
+    const url = `https://api.mfapi.in/mf/120621?startDate=${start}&endDate=${end}`;
+
+    this.http.get<any>(url)
       .subscribe({
         next: (resp) => {
           if (!resp || !resp.data || !Array.isArray(resp.data)) {
@@ -118,7 +143,7 @@ export class MutualFundPage implements OnInit {
             nav: r.nav
           }));
 
-          // add dailyUnitPurchase to each record
+          // add dailyUnitPurchase using current investPerDay
           this.records = this.records.map((item) => {
             const nav = parseFloat(item.nav);
             const dailyUnits = (isFinite(nav) && nav > 0) ? (this.investPerDay / nav) : 0;
@@ -149,15 +174,13 @@ export class MutualFundPage implements OnInit {
           // compute data-only overall returns (buy 1 unit at first NAV -> hold to last NAV)
           this.computeDataOverallReturns(this.records);
 
-          // compute monthly SIP results (overall)
+          // compute monthly SIP results (overall) using current investPerMonth
           this.computeMonthlySip(this.records, this.investPerMonth);
 
           this.loading = false;
-
-          console.log("monthlyRecords: ", this.monthlyRecords);
-          console.log("yearSummaries: ", this.yearSummaries);
         },
         error: (err) => {
+          console.error(err);
           this.error = 'Failed to fetch data';
           this.loading = false;
         }
