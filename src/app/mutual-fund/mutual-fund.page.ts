@@ -7,6 +7,15 @@ interface MfRecord {
   dailyUnitPurchase?: number;
 }
 
+interface WeeklyByWeekday {
+  weekday: string; // 'Mon'..'Fri'
+  investmentTill: number;
+  unitsTill: number;
+  currentValueTill: number;
+  growthTill: number;
+  annualisedReturn?: number | null;
+}
+
 interface YearSummary {
   year: number;
   daysInYear: number;
@@ -30,6 +39,16 @@ interface YearSummary {
   monthlyCurrentValueTill?: number;
   monthlyGrowthTill?: number;
   monthlyAnnualisedReturn?: number | null;
+
+  // weekly (Monday) fields (cumulative up to year)
+  weeklyInvestmentTill?: number;
+  weeklyUnitsTill?: number;
+  weeklyCurrentValueTill?: number;
+  weeklyGrowthTill?: number;
+  weeklyAnnualisedReturn?: number | null;
+
+  // new: per-weekday breakdown
+  weeklyByWeekday?: Record<string, WeeklyByWeekday>;
 }
 
 interface MonthlyRecord {
@@ -38,6 +57,17 @@ interface MonthlyRecord {
   date: string;  // first date used for month in dd-mm-yyyy
   nav: number;
   monthlyUnits: number;
+}
+
+interface WeeklySummaryRow {
+  weekday: string; // 'Mon'..'Fri'
+  totalInvested: number;
+  totalUnits: number;
+  currentValue: number;
+  totalGain: number;
+  gainPercent: number;
+  annualisedReturn: number | null;
+  weeksCount: number;
 }
 
 @Component({
@@ -51,11 +81,12 @@ export class MutualFundPage implements OnInit {
 
   // defaults (you can change in the UI)
   investPerDay = 100;
+  investPerWeek = 1000;
   investPerMonth = 2000;
 
   // date range defaults (yyyy-mm-dd)
-  startDate = '2000-11-26';
-  endDate = '2025-11-21';
+  startDate = '2020-01-01';
+  endDate = '2025-11-25';
 
   // scheme code (default)
   schemeCode = 120621;
@@ -84,6 +115,9 @@ export class MutualFundPage implements OnInit {
   monthlyTotalGain = 0;
   monthlyGainPercent = 0;
   monthlyAnnualisedReturn: number | null = null;
+
+  // weekly comparison summary (Mon..Fri)
+  weeklySummary: WeeklySummaryRow[] = [];
 
   yearSummaries: YearSummary[] = [];
   portfolioAnnualisedReturn: number | null = null;
@@ -144,7 +178,7 @@ export class MutualFundPage implements OnInit {
     this.schemeCode = s.schemeCode;
     // optional: set tentative fundMeta so UI shows picked name while loading
     this.fundMeta = { scheme_name: s.schemeName, fund_house: '-', scheme_category: '-', scheme_type: '-' };
-    // clear search results (or keep if you want)
+    // clear search results
     this.searchResults = [];
     // fetch NAVs for selected scheme
     this.fetchData();
@@ -170,8 +204,8 @@ export class MutualFundPage implements OnInit {
     this.error = null;
 
     // API expects yyyy-mm-dd for startDate/endDate params
-    const start = this.startDate || '2000-11-26';
-    const end = this.endDate || '2025-11-21';
+    const start = this.startDate || '2020-01-01';
+    const end = this.endDate || '2025-11-25';
 
     const url = `https://api.mfapi.in/mf/${this.schemeCode}?startDate=${start}&endDate=${end}`;
 
@@ -215,8 +249,8 @@ export class MutualFundPage implements OnInit {
           this.totalGain = this.currentValue - this.totalInvested;
           this.gainPercent = this.totalInvested > 0 ? (this.totalGain / this.totalInvested) * 100 : 0;
 
-          // build year-wise summary (SIP) and include data returns per year and monthly snapshots
-          this.yearSummaries = this.buildYearlySummaryWithDataAndMonthly(this.records, this.investPerDay, this.investPerMonth);
+          // build year-wise summary (SIP) and include data returns per year and monthly snapshots (weekly Mon included)
+          this.yearSummaries = this.buildYearlySummaryWithDataAndMonthly(this.records, this.investPerDay, this.investPerMonth, this.investPerWeek);
 
           // compute portfolio annualised return using XIRR (SIP daily)
           this.portfolioAnnualisedReturn = this.computePortfolioAnnualisedReturn(this.records, this.investPerDay, this.currentValue, this.records[0]?.date);
@@ -226,6 +260,9 @@ export class MutualFundPage implements OnInit {
 
           // compute monthly SIP results (overall) using current investPerMonth
           this.computeMonthlySip(this.records, this.investPerMonth);
+
+          // compute weekly SIP variation for Mon..Fri using investPerWeek
+          this.weeklySummary = this.computeWeeklySipByWeekday(this.records, this.investPerWeek);
 
           this.loading = false;
         },
@@ -237,16 +274,103 @@ export class MutualFundPage implements OnInit {
       });
   }
 
-  /**
-   * Build year-wise cumulative summary (SIP) and attach data-only returns per year and monthly SIP cumulative snapshots.
-   */
-  private buildYearlySummaryWithDataAndMonthly(records: MfRecord[], investPerDay = 100, investPerMonth = 100): YearSummary[] {
-    if (!records || records.length === 0) return [];
+  // ---------- Weekly SIP by weekday ----------
+  private computeWeeklySipByWeekday(records: MfRecord[], investPerWeek: number): WeeklySummaryRow[] {
+    const result: WeeklySummaryRow[] = [];
+    if (!records || records.length === 0) {
+      return ['Mon','Tue','Wed','Thu','Fri'].map(d => ({
+        weekday: d, totalInvested: 0, totalUnits: 0, currentValue: 0, totalGain: 0, gainPercent: 0, annualisedReturn: null, weeksCount: 0
+      }));
+    }
 
-    // oldest-first for chronological processing
+    // oldest-first
     const oldestFirst = [...records].reverse();
 
-    // --- prepare monthly first-of-month list (chronological) ---
+    // Build map of weekStart (Monday ISO) -> list of records in that week (chronological)
+    const weekMap = new Map<string, MfRecord[]>();
+    for (const r of oldestFirst) {
+      const dt = this.parseDateFromDDMMYYYY(r.date);
+      const day = dt.getDay(); // 0 Sun .. 6 Sat
+      const offsetToMonday = (day + 6) % 7;
+      const monday = new Date(dt);
+      monday.setDate(dt.getDate() - offsetToMonday);
+      const k = this.toYYYYMMDD(monday);
+      const arr = weekMap.get(k) || [];
+      arr.push(r);
+      weekMap.set(k, arr);
+    }
+
+    const weekdays = [
+      { idx: 1, name: 'Mon' },
+      { idx: 2, name: 'Tue' },
+      { idx: 3, name: 'Wed' },
+      { idx: 4, name: 'Thu' },
+      { idx: 5, name: 'Fri' }
+    ];
+
+    const weekKeys = Array.from(weekMap.keys()).sort((a, b) => a.localeCompare(b));
+
+    for (const wd of weekdays) {
+      let totalInvested = 0;
+      let totalUnits = 0;
+      const flows: { date: string; amount: number }[] = [];
+      let weeksCount = 0;
+
+      for (const wk of weekKeys) {
+        const weekRecords = weekMap.get(wk)!; // chronological within week
+        let chosen: MfRecord | null = null;
+        for (const rec of weekRecords) {
+          const dt = this.parseDateFromDDMMYYYY(rec.date);
+          const d = dt.getDay(); // 0..6
+          const mapped = (d === 0) ? 7 : d; // Sunday=7
+          if (mapped === wd.idx) {
+            chosen = rec;
+            break;
+          }
+        }
+        if (!chosen) continue;
+        const nav = parseFloat(chosen.nav);
+        if (!isFinite(nav) || nav <= 0) continue;
+        weeksCount++;
+        totalInvested += investPerWeek;
+        const units = investPerWeek / nav;
+        totalUnits += units;
+        flows.push({ date: chosen.date, amount: -investPerWeek });
+      }
+
+      const lastDate = this.records[0]?.date || (weekKeys.length ? weekMap.get(weekKeys[weekKeys.length - 1])![0].date : null);
+      const terminalAmount = totalUnits * (this.latestNav || 0);
+      if (lastDate) flows.push({ date: lastDate, amount: terminalAmount });
+
+      const x = this.xirr(flows);
+      const annualisedReturn = x === null ? null : x * 100;
+
+      const currentValue = totalUnits * (this.latestNav || 0);
+      const totalGain = currentValue - totalInvested;
+      const gainPercent = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+
+      result.push({
+        weekday: wd.name,
+        totalInvested,
+        totalUnits,
+        currentValue,
+        totalGain,
+        gainPercent,
+        annualisedReturn,
+        weeksCount
+      });
+    }
+
+    return result;
+  }
+
+  // ---------- Yearly + monthly + weekly builder (per-weekday breakdown) ----------
+  private buildYearlySummaryWithDataAndMonthly(records: MfRecord[], investPerDay = 100, investPerMonth = 100, investPerWeek = 1000): YearSummary[] {
+    if (!records || records.length === 0) return [];
+
+    const oldestFirst = [...records].reverse();
+
+    // --- monthly first-of-month list (chronological) ---
     const monthMap = new Map<string, MfRecord>();
     for (const r of oldestFirst) {
       const parts = (r.date || '').split('-');
@@ -255,6 +379,21 @@ export class MutualFundPage implements OnInit {
       if (!monthMap.has(key)) monthMap.set(key, r); // first chronological gets stored
     }
     const monthlyFirsts = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(e => e[1]);
+
+    // --- weekly map of week (Monday) -> records in that week ---
+    const weekMap = new Map<string, MfRecord[]>();
+    for (const r of oldestFirst) {
+      const dt = this.parseDateFromDDMMYYYY(r.date);
+      const day = dt.getDay();
+      const offsetToMonday = (day + 6) % 7;
+      const monday = new Date(dt);
+      monday.setDate(dt.getDate() - offsetToMonday);
+      const k = this.toYYYYMMDD(monday);
+      const arr = weekMap.get(k) || [];
+      arr.push(r);
+      weekMap.set(k, arr);
+    }
+    const weekKeysAll = Array.from(weekMap.keys()).sort();
 
     // --- per-year daily-SIP cumulative snapshots and data per-year first/last NAV ---
     const map = new Map<number, {
@@ -302,7 +441,6 @@ export class MutualFundPage implements OnInit {
       map.set(year, entry);
     }
 
-    // build summaries in ascending year order
     const years = Array.from(map.keys()).sort((a, b) => a - b);
     const summaries: YearSummary[] = [];
 
@@ -353,7 +491,6 @@ export class MutualFundPage implements OnInit {
       }
 
       // --- Monthly cumulative up to year-end ---
-      // months with yyyy <= y from monthlyFirsts
       const monthsUpToYear = monthlyFirsts.filter(m => {
         const parts = (m.date || '').split('-');
         if (parts.length !== 3) return false;
@@ -378,18 +515,111 @@ export class MutualFundPage implements OnInit {
       let monthlyAnnualisedReturn: number | null = null;
       if (monthsUpToYear.length > 0) {
         const flowsMonthly: { date: string; amount: number }[] = [];
-        // chronological monthsUpToYear are already chronological from monthlyFirsts
         for (const m of monthsUpToYear) {
           flowsMonthly.push({ date: m.date, amount: -investPerMonth });
         }
-        // terminal positive on year-end last date
         const terminalDate = snap.lastDateOfYear || monthsUpToYear[monthsUpToYear.length - 1].date;
         flowsMonthly.push({ date: terminalDate, amount: monthlyCurrentValueTill });
-
         const xirrM = this.xirr(flowsMonthly);
         monthlyAnnualisedReturn = xirrM === null ? null : xirrM * 100;
       } else {
         monthlyAnnualisedReturn = null;
+      }
+
+      // --- Weekly (Mon) cumulative up to year-end (quick Mon snapshot) ---
+      const weeksUpToYearKeys = weekKeysAll.filter(k => {
+        const mondayArr = weekMap.get(k)!;
+        if (!mondayArr || mondayArr.length === 0) return false;
+        const dYear = parseInt(mondayArr[0].date.split('-')[2], 10);
+        return dYear <= y;
+      });
+
+      let weeklyUnitsTill = 0;
+      let weeklyInvestmentTill = 0;
+      let lastWeeklyDateForYear = '';
+      for (const wkKey of weeksUpToYearKeys) {
+        const arr = weekMap.get(wkKey)!;
+        const mondayRec = arr.find(rr => this.parseDateFromDDMMYYYY(rr.date).getDay() === 1);
+        if (!mondayRec) continue;
+        const navw = parseFloat(mondayRec.nav as any);
+        if (!isFinite(navw) || navw <= 0) continue;
+        weeklyUnitsTill += investPerWeek / navw;
+        weeklyInvestmentTill += investPerWeek;
+        lastWeeklyDateForYear = mondayRec.date;
+      }
+      const weeklyCurrentValueTill = weeklyUnitsTill * navAtYearEnd;
+      const weeklyGrowthTill = weeklyCurrentValueTill - weeklyInvestmentTill;
+
+      let weeklyAnnualisedReturn: number | null = null;
+      if (weeksUpToYearKeys.length > 0) {
+        const flowsWeekly: { date: string; amount: number }[] = [];
+        for (const wkKey of weeksUpToYearKeys) {
+          const arr = weekMap.get(wkKey)!;
+          const mondayRec = arr.find(rr => this.parseDateFromDDMMYYYY(rr.date).getDay() === 1);
+          if (!mondayRec) continue;
+          flowsWeekly.push({ date: mondayRec.date, amount: -investPerWeek });
+        }
+        const terminalDate = snap.lastDateOfYear || (weeksUpToYearKeys.length ? (weekMap.get(weeksUpToYearKeys[weeksUpToYearKeys.length - 1])![0].date) : snap.lastDateOfYear);
+        flowsWeekly.push({ date: terminalDate, amount: weeklyCurrentValueTill });
+        const xirrW = this.xirr(flowsWeekly);
+        weeklyAnnualisedReturn = xirrW === null ? null : xirrW * 100;
+      } else {
+        weeklyAnnualisedReturn = null;
+      }
+
+      // --- weekly per-weekday breakdown (Mon..Fri) cumulative up to year-end ---
+      const weekdays = [
+        { idx: 1, name: 'Mon' },
+        { idx: 2, name: 'Tue' },
+        { idx: 3, name: 'Wed' },
+        { idx: 4, name: 'Thu' },
+        { idx: 5, name: 'Fri' }
+      ];
+
+      const weeklyByWeekday: Record<string, WeeklyByWeekday> = {};
+
+      for (const wd of weekdays) {
+        let inv = 0;
+        let units = 0;
+        const flowsW: { date: string; amount: number }[] = [];
+
+        for (const wkKey of weekKeysAll) {
+          const arr = weekMap.get(wkKey)!;
+          if (!arr || arr.length === 0) continue;
+          const chosen = arr.find(rr => {
+            const d = this.parseDateFromDDMMYYYY(rr.date).getDay();
+            const mapped = (d === 0) ? 7 : d;
+            return mapped === wd.idx;
+          });
+          if (!chosen) continue;
+          const yOfRec = parseInt(chosen.date.split('-')[2], 10);
+          if (yOfRec > y) continue;
+          const navc = parseFloat(chosen.nav);
+          if (!isFinite(navc) || navc <= 0) continue;
+          inv += investPerWeek;
+          const u = investPerWeek / navc;
+          units += u;
+          flowsW.push({ date: chosen.date, amount: -investPerWeek });
+        }
+
+        const terminalDate = snap.lastDateOfYear;
+        const terminalAmountW = units * navAtYearEnd;
+        if (terminalDate) flowsW.push({ date: terminalDate, amount: terminalAmountW });
+
+        const xirrWday = this.xirr(flowsW);
+        const annualisedWday = xirrWday === null ? null : xirrWday * 100;
+
+        const currentValW = units * navAtYearEnd;
+        const growthW = currentValW - inv;
+
+        weeklyByWeekday[wd.name] = {
+          weekday: wd.name,
+          investmentTill: inv,
+          unitsTill: units,
+          currentValueTill: currentValW,
+          growthTill: growthW,
+          annualisedReturn: annualisedWday
+        };
       }
 
       summaries.push({
@@ -412,16 +642,28 @@ export class MutualFundPage implements OnInit {
         monthlyUnitsTill,
         monthlyCurrentValueTill,
         monthlyGrowthTill,
-        monthlyAnnualisedReturn
+        monthlyAnnualisedReturn,
+
+        weeklyInvestmentTill,
+        weeklyUnitsTill,
+        weeklyCurrentValueTill,
+        weeklyGrowthTill,
+        weeklyAnnualisedReturn,
+
+        weeklyByWeekday
       });
     }
 
     return summaries;
   }
 
-  /**
-   * Compute overall data buy-and-hold returns (1 unit bought at first NAV -> value at last NAV).
-   */
+  // ---------- helpers ----------
+  getWeeklyByWeekdayEntries(y: YearSummary): WeeklyByWeekday[] {
+    if (!y.weeklyByWeekday) return [];
+    const order = ['Mon','Tue','Wed','Thu','Fri'];
+    return order.map(k => y.weeklyByWeekday![k] || { weekday: k, investmentTill: 0, unitsTill: 0, currentValueTill: 0, growthTill: 0 });
+  }
+
   private computeDataOverallReturns(records: MfRecord[]) {
     if (!records || records.length === 0) {
       this.firstNav = this.lastNav = 0;
@@ -460,9 +702,6 @@ export class MutualFundPage implements OnInit {
     }
   }
 
-  /**
-   * Compute monthly SIP overall (first NAV of each month).
-   */
   private computeMonthlySip(records: MfRecord[], investPerMonth: number) {
     this.monthlyRecords = [];
     this.monthlyTotalMonths = 0;
@@ -516,7 +755,6 @@ export class MutualFundPage implements OnInit {
     this.monthlyAnnualisedReturn = xirrMonthly === null ? null : xirrMonthly * 100;
   }
 
-  // ---------- XIRR implementation ----------
   private computePortfolioAnnualisedReturn(records: MfRecord[], investPerDay: number, finalValue: number, lastDateStr?: string): number | null {
     if (!records || records.length === 0) return null;
     const oldestFirst = [...records].reverse();
@@ -535,7 +773,11 @@ export class MutualFundPage implements OnInit {
 
     const parseDate = (s: string) => {
       const p = s.split('-');
-      return new Date(`${p[2]}-${p[1]}-${p[0]}`); // yyyy-mm-dd
+      // detect dd-mm-yyyy vs yyyy-mm-dd
+      if (p.length === 3 && p[0].length === 4) {
+        return new Date(`${p[0]}-${p[1]}-${p[2]}`);
+      }
+      return new Date(`${p[2]}-${p[1]}-${p[0]}`);
     };
 
     const baseDate = parseDate(flows[0].date).getTime();
@@ -562,7 +804,6 @@ export class MutualFundPage implements OnInit {
       iterExpand++;
     }
     if (fLow * fHigh > 0) {
-      // fallback Newton-Raphson attempt
       try {
         let guess = 0.1;
         for (let i = 0; i < 100; i++) {
@@ -609,7 +850,17 @@ export class MutualFundPage implements OnInit {
 
   private parseDateFromDDMMYYYY(s: string): Date {
     const p = (s || '').split('-');
+    if (p.length !== 3) return new Date(s);
+    // if first segment is 4 length assume yyyy-mm-dd, else dd-mm-yyyy
+    if (p[0].length === 4) return new Date(`${p[0]}-${p[1]}-${p[2]}`);
     return new Date(`${p[2]}-${p[1]}-${p[0]}`);
+  }
+
+  private toYYYYMMDD(d: Date): string {
+    const yyyy = d.getFullYear();
+    const mm = ('0' + (d.getMonth() + 1)).slice(-2);
+    const dd = ('0' + d.getDate()).slice(-2);
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   formatIndianCurrency(amount: number): string {

@@ -1,18 +1,20 @@
 .table-wrapper {
     overflow-x: auto;
+    padding-bottom: 8px;
 }
 
 .mf-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    white-space: nowrap;
 }
 
 .mf-table th,
 .mf-table td {
     padding: 8px 10px;
     border-bottom: 1px solid var(--ion-color-light-contrast);
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .mf-table thead th {
@@ -24,4 +26,14 @@
     font-size: 11px;
     color: var(--ion-color-medium);
     margin-top: 4px;
+}
+
+/* small table cells for nested (if used) */
+.mf-table.small th, .mf-table.small td {
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.nested-weekday-row td {
+  background: rgba(0,0,0,0.02);
 }
