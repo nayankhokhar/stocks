@@ -54,8 +54,17 @@ export class MutualFundPage implements OnInit {
   investPerMonth = 2000;
 
   // date range defaults (yyyy-mm-dd)
-  startDate = '';
-  endDate = '';
+  startDate = '2000-11-26';
+  endDate = '2025-11-21';
+
+  // scheme code (default)
+  schemeCode = 120621;
+
+  // search UI
+  searchTerm = '';
+  searchResults: { schemeCode: number; schemeName: string }[] = [];
+  searchLoading = false;
+  searchError: string | null = null;
 
   // totals (daily SIP)
   totalDays = 0;
@@ -96,9 +105,52 @@ export class MutualFundPage implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
+    // initial load using defaults
+    this.fetchData();
   }
 
-  /** Called from Submit button */
+  // ---------------- Search methods ----------------
+  onSearch() {
+    if (!this.searchTerm || this.searchTerm.trim() === '') {
+      this.searchError = 'Enter search term';
+      return;
+    }
+    this.searchError = null;
+    this.searchLoading = true;
+    this.searchResults = [];
+
+    const q = encodeURIComponent(this.searchTerm.trim());
+    const url = `https://api.mfapi.in/mf/search?q=${q}`;
+
+    this.http.get<any>(url).subscribe({
+      next: (resp) => {
+        this.searchLoading = false;
+        if (!Array.isArray(resp)) {
+          this.searchError = 'Unexpected search response';
+          return;
+        }
+        this.searchResults = resp.map((r: any) => ({ schemeCode: r.schemeCode, schemeName: r.schemeName }));
+      },
+      error: (err) => {
+        console.error(err);
+        this.searchLoading = false;
+        this.searchError = 'Search failed';
+      }
+    });
+  }
+
+  selectScheme(s: { schemeCode: number; schemeName: string }) {
+    // set scheme and fetch data for it
+    this.schemeCode = s.schemeCode;
+    // optional: set tentative fundMeta so UI shows picked name while loading
+    this.fundMeta = { scheme_name: s.schemeName, fund_house: '-', scheme_category: '-', scheme_type: '-' };
+    // clear search results (or keep if you want)
+    this.searchResults = [];
+    // fetch NAVs for selected scheme
+    this.fetchData();
+  }
+
+  // ---------------- Submit / Fetch ----------------
   onSubmit() {
     // basic validation
     if (!this.startDate || !this.endDate) {
@@ -109,21 +161,19 @@ export class MutualFundPage implements OnInit {
       this.error = 'Start date must be before or equal to end date.';
       return;
     }
-    // clear previous error and fetch
     this.error = null;
     this.fetchData();
   }
 
-  /** Main fetch - uses this.startDate and this.endDate and current invest amounts */
   fetchData() {
     this.loading = true;
     this.error = null;
 
     // API expects yyyy-mm-dd for startDate/endDate params
-    const start = this.startDate;
-    const end = this.endDate;
+    const start = this.startDate || '2000-11-26';
+    const end = this.endDate || '2025-11-21';
 
-    const url = `https://api.mfapi.in/mf/120621?startDate=${start}&endDate=${end}`;
+    const url = `https://api.mfapi.in/mf/${this.schemeCode}?startDate=${start}&endDate=${end}`;
 
     this.http.get<any>(url)
       .subscribe({
@@ -134,8 +184,8 @@ export class MutualFundPage implements OnInit {
             return;
           }
 
-          // store meta for UI
-          this.fundMeta = resp.meta || null;
+          // store meta for UI (API returns meta)
+          this.fundMeta = resp.meta || this.fundMeta || null;
 
           // copy into local array (latest-first expected)
           this.records = resp.data.map((r: any) => ({

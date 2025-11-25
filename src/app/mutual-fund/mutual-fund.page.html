@@ -1,5 +1,66 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Mutual Fund SIP Calculator </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="fetchData()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="ion-padding" style="font-weight: 700;">
-  <!-- --- User Inputs / Controls --- -->
+  <!-- --- Search bar --- -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Search Mutual Funds</ion-card-title>
+      <ion-card-subtitle>Type name and press Search — then pick a scheme from results</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="8">
+            <ion-item>
+              <ion-input placeholder="Search (e.g. ICICI Prudential Infrastructure Fund - Direct Plan - Growth)"
+                [(ngModel)]="searchTerm" clearInput></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="4">
+            <ion-button expand="block" (click)="onSearch()"
+              [disabled]="searchLoading || !searchTerm">Search</ion-button>
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngIf="searchLoading">
+          <ion-col>
+            Searching...
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngIf="searchError">
+          <ion-col color="danger">
+            {{ searchError }}
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngIf="searchResults?.length">
+          <ion-col>
+            <ion-list>
+              <ion-list-header>Results (click to select)</ion-list-header>
+              <ion-item button *ngFor="let s of searchResults" (click)="selectScheme(s)">
+                <ion-label>
+                  <h3>{{ s.schemeName }}</h3>
+                  <p>Scheme Code: {{ s.schemeCode }}</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- --- Inputs (SIP amounts + date range) --- -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>Inputs</ion-card-title>
@@ -27,7 +88,6 @@
           <ion-col size="6">
             <ion-item>
               <ion-label position="stacked">Start date</ion-label>
-              <!-- browser date input gives yyyy-mm-dd which suits API -->
               <input ion-input type="date" [(ngModel)]="startDate" />
             </ion-item>
           </ion-col>
@@ -67,7 +127,7 @@
         </ion-row>
         <ion-row>
           <ion-col size="6"><strong>Scheme Code</strong>
-            <div>{{ fundMeta.scheme_code || '-' }}</div>
+            <div>{{ schemeCode || '-' }}</div>
           </ion-col>
           <ion-col size="6"><strong>ISIN (Growth)</strong>
             <div>{{ fundMeta.isin_growth || '-' }}</div>
