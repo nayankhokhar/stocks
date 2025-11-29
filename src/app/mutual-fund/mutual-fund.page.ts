@@ -1,10 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { ModalController } from '@ionic/angular';
 
 interface MfRecord {
   date: string;            // "dd-mm-yyyy"
   nav: string;
   dailyUnitPurchase?: number;
+}
+
+interface SipTransaction {
+  date: string;
+  nav: number;
+  amount: number;
+  units: number;
 }
 
 interface WeeklyByWeekday {
@@ -81,11 +89,11 @@ export class MutualFundPage implements OnInit {
 
   // defaults (you can change in the UI)
   investPerDay = 100;
-  investPerWeek = 1000;
+  investPerWeek = 500;
   investPerMonth = 2000;
 
   // date range defaults (yyyy-mm-dd)
-  startDate = '2020-01-01';
+  startDate = '1990-01-01';
   endDate = '2025-11-25';
 
   // scheme code (default)
@@ -136,7 +144,7 @@ export class MutualFundPage implements OnInit {
   loading = true;
   error: string | null = null;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private modalController: ModalController) { }
 
   ngOnInit() {
     // initial load using defaults
@@ -249,6 +257,17 @@ export class MutualFundPage implements OnInit {
           this.totalGain = this.currentValue - this.totalInvested;
           this.gainPercent = this.totalInvested > 0 ? (this.totalGain / this.totalInvested) * 100 : 0;
 
+          // Populate daily details
+          this.dailyDetails = this.records.map(r => {
+            const nav = parseFloat(r.nav);
+            return {
+              date: r.date,
+              nav: nav,
+              amount: this.investPerDay,
+              units: (isFinite(nav) && nav > 0) ? (this.investPerDay / nav) : 0
+            };
+          }).reverse(); // Make chronological (oldest first)
+
           // build year-wise summary (SIP) and include data returns per year and monthly snapshots (weekly Mon included)
           this.yearSummaries = this.buildYearlySummaryWithDataAndMonthly(this.records, this.investPerDay, this.investPerMonth, this.investPerWeek);
 
@@ -275,10 +294,39 @@ export class MutualFundPage implements OnInit {
   }
 
   // ---------- Weekly SIP by weekday ----------
+  weeklyDetails: Record<string, SipTransaction[]> = {};
+  monthlyDetails: SipTransaction[] = [];
+  dailyDetails: SipTransaction[] = [];
+
+  selectedSipDetails: SipTransaction[] = [];
+  selectedSipTitle: string = '';
+  showDetails = false;
+
+  openDetails(type: string, weekday?: string) {
+    this.showDetails = true;
+    if (type === 'daily') {
+      this.selectedSipTitle = 'Daily SIP Details';
+      this.selectedSipDetails = this.dailyDetails;
+    } else if (type === 'monthly') {
+      this.selectedSipTitle = 'Monthly SIP Details';
+      this.selectedSipDetails = this.monthlyDetails;
+    } else if (type === 'weekly' && weekday) {
+      this.selectedSipTitle = `Weekly SIP (${weekday}) Details`;
+      this.selectedSipDetails = this.weeklyDetails[weekday] || [];
+    }
+  }
+
+  closeDetails() {
+    this.showDetails = false;
+    this.selectedSipDetails = [];
+  }
+
   private computeWeeklySipByWeekday(records: MfRecord[], investPerWeek: number): WeeklySummaryRow[] {
     const result: WeeklySummaryRow[] = [];
+    this.weeklyDetails = {}; // reset
+
     if (!records || records.length === 0) {
-      return ['Mon','Tue','Wed','Thu','Fri'].map(d => ({
+      return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(d => ({
         weekday: d, totalInvested: 0, totalUnits: 0, currentValue: 0, totalGain: 0, gainPercent: 0, annualisedReturn: null, weeksCount: 0
       }));
     }
@@ -314,6 +362,7 @@ export class MutualFundPage implements OnInit {
       let totalInvested = 0;
       let totalUnits = 0;
       const flows: { date: string; amount: number }[] = [];
+      const transactions: SipTransaction[] = [];
       let weeksCount = 0;
 
       for (const wk of weekKeys) {
@@ -336,7 +385,16 @@ export class MutualFundPage implements OnInit {
         const units = investPerWeek / nav;
         totalUnits += units;
         flows.push({ date: chosen.date, amount: -investPerWeek });
+
+        transactions.push({
+          date: chosen.date,
+          nav: nav,
+          amount: investPerWeek,
+          units: units
+        });
       }
+
+      this.weeklyDetails[wd.name] = transactions;
 
       const lastDate = this.records[0]?.date || (weekKeys.length ? weekMap.get(weekKeys[weekKeys.length - 1])![0].date : null);
       const terminalAmount = totalUnits * (this.latestNav || 0);
@@ -365,7 +423,7 @@ export class MutualFundPage implements OnInit {
   }
 
   // ---------- Yearly + monthly + weekly builder (per-weekday breakdown) ----------
-  private buildYearlySummaryWithDataAndMonthly(records: MfRecord[], investPerDay = 100, investPerMonth = 100, investPerWeek = 1000): YearSummary[] {
+  private buildYearlySummaryWithDataAndMonthly(records: MfRecord[], investPerDay = 100, investPerMonth = 100, investPerWeek = 500): YearSummary[] {
     if (!records || records.length === 0) return [];
 
     const oldestFirst = [...records].reverse();
@@ -660,7 +718,7 @@ export class MutualFundPage implements OnInit {
   // ---------- helpers ----------
   getWeeklyByWeekdayEntries(y: YearSummary): WeeklyByWeekday[] {
     if (!y.weeklyByWeekday) return [];
-    const order = ['Mon','Tue','Wed','Thu','Fri'];
+    const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     return order.map(k => y.weeklyByWeekday![k] || { weekday: k, investmentTill: 0, unitsTill: 0, currentValueTill: 0, growthTill: 0 });
   }
 
@@ -711,6 +769,7 @@ export class MutualFundPage implements OnInit {
     this.monthlyTotalGain = 0;
     this.monthlyGainPercent = 0;
     this.monthlyAnnualisedReturn = null;
+    this.monthlyDetails = []; // reset
 
     if (!records || records.length === 0) return;
 
@@ -739,6 +798,14 @@ export class MutualFundPage implements OnInit {
       this.monthlyTotalUnits += units;
       this.monthlyTotalInvested += investPerMonth;
     }
+
+    // Populate monthly details
+    this.monthlyDetails = this.monthlyRecords.map(r => ({
+      date: r.date,
+      nav: r.nav,
+      amount: investPerMonth,
+      units: r.monthlyUnits
+    }));
 
     this.monthlyTotalMonths = this.monthlyRecords.length;
     this.monthlyCurrentValue = this.monthlyTotalUnits * this.latestNav;
@@ -861,6 +928,15 @@ export class MutualFundPage implements OnInit {
     const mm = ('0' + (d.getMonth() + 1)).slice(-2);
     const dd = ('0' + d.getDate()).slice(-2);
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  async dismissModal(type: string) {
+    // Close the modal after date selection
+    console.log(`${type} date selected:`, type === 'start' ? this.startDate : this.endDate);
+    const modal = await this.modalController.getTop();
+    if (modal) {
+      await modal.dismiss();
+    }
   }
 
   formatIndianCurrency(amount: number): string {

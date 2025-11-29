@@ -1,6 +1,6 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Mutual Fund SIP Calculator </ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="main-header">
+    <ion-title>Mutual Fund SIP Calculator</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="fetchData()">
         <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
@@ -9,43 +9,56 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" style="font-weight: 700;">
+<ion-content>
   <!-- --- Search bar --- -->
-  <ion-card>
+  <ion-card class="modern-card">
     <ion-card-header>
       <ion-card-title>Search Mutual Funds</ion-card-title>
-      <ion-card-subtitle>Type name and press Search — then pick a scheme from results</ion-card-subtitle>
+      <ion-card-subtitle>Find and select a scheme to analyze</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-grid>
+      <ion-grid class="search-section">
         <ion-row>
-          <ion-col size="8">
-            <ion-item>
-              <ion-input placeholder="Search (e.g. ICICI Prudential Infrastructure Fund - Direct Plan - Growth)"
-                [(ngModel)]="searchTerm" clearInput></ion-input>
+          <ion-col size="12" size-md="8">
+            <ion-item lines="none">
+              <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
+              <ion-input placeholder="e.g. ICICI Prudential Infrastructure Fund" [(ngModel)]="searchTerm"
+                (keyup.enter)="onSearch()" clearInput></ion-input>
             </ion-item>
           </ion-col>
-          <ion-col size="4">
-            <ion-button expand="block" (click)="onSearch()" [disabled]="searchLoading || !searchTerm">Search</ion-button>
+          <ion-col size="12" size-md="4">
+            <ion-button expand="block" class="action-button" (click)="onSearch()"
+              [disabled]="searchLoading || !searchTerm" style="margin-top: 0;">
+              Search
+            </ion-button>
           </ion-col>
         </ion-row>
 
         <ion-row *ngIf="searchLoading">
-          <ion-col>Searching...</ion-col>
+          <ion-col class="ion-text-center">
+            <ion-spinner name="crescent"></ion-spinner>
+          </ion-col>
         </ion-row>
 
         <ion-row *ngIf="searchError">
-          <ion-col color="danger">{{ searchError }}</ion-col>
+          <ion-col>
+            <div class="text-neg" style="padding: 10px; background: #fee2e2; border-radius: 8px;">
+              {{ searchError }}
+            </div>
+          </ion-col>
         </ion-row>
 
         <ion-row *ngIf="searchResults?.length">
           <ion-col>
-            <ion-list>
-              <ion-list-header>Results (click to select)</ion-list-header>
-              <ion-item button *ngFor="let s of searchResults" (click)="selectScheme(s)">
+            <ion-list lines="none" style="margin-top: 16px;">
+              <ion-list-header>
+                <ion-label color="medium">Results</ion-label>
+              </ion-list-header>
+              <ion-item button *ngFor="let s of searchResults" (click)="selectScheme(s)"
+                style="--background: #f9fafb; margin-bottom: 8px; border-radius: 8px;">
                 <ion-label>
-                  <h3>{{ s.schemeName }}</h3>
-                  <p>Scheme Code: {{ s.schemeCode }}</p>
+                  <h3 style="font-weight: 600; color: var(--text-color-primary);">{{ s.schemeName }}</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-color-secondary);">Code: {{ s.schemeCode }}</p>
                 </ion-label>
               </ion-item>
             </ion-list>
@@ -56,82 +69,107 @@
   </ion-card>
 
   <!-- --- Inputs (SIP amounts + date range) --- -->
-  <ion-card>
+  <ion-card class="modern-card">
     <ion-card-header>
-      <ion-card-title>Inputs</ion-card-title>
-      <ion-card-subtitle>Change SIP amounts and date range, then press Submit</ion-card-subtitle>
+      <ion-card-title>Investment Details</ion-card-title>
+      <ion-card-subtitle>Configure your SIP amounts and duration</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="4">
-            <ion-item>
-              <ion-label position="stacked">Invest per day (₹)</ion-label>
-              <ion-input type="number" min="0" [(ngModel)]="investPerDay"></ion-input>
-            </ion-item>
-          </ion-col>
+      <div class="input-group">
+        <!-- Investments -->
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="4">
+              <ion-item lines="none">
+                <ion-label position="stacked">Invest per day (₹)</ion-label>
+                <ion-input type="number" min="0" [(ngModel)]="investPerDay" style="--padding-start: 10px;"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item lines="none">
+                <ion-label position="stacked">Invest per week (₹)</ion-label>
+                <ion-input type="number" min="0" [(ngModel)]="investPerWeek" style="--padding-start: 10px;"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item lines="none">
+                <ion-label position="stacked">Invest per month (₹)</ion-label>
+                <ion-input type="number" min="0" [(ngModel)]="investPerMonth"
+                  style="--padding-start: 10px;"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
 
-          <ion-col size="4">
-            <ion-item>
-              <ion-label position="stacked">Invest per week (₹)</ion-label>
-              <ion-input type="number" min="0" [(ngModel)]="investPerWeek"></ion-input>
-            </ion-item>
-          </ion-col>
-
-          <ion-col size="4">
-            <ion-item>
-              <ion-label position="stacked">Invest per month (₹)</ion-label>
-              <ion-input type="number" min="0" [(ngModel)]="investPerMonth"></ion-input>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-          <ion-col size="6">
-            <ion-item>
-              <ion-label position="stacked">Start date</ion-label>
-              <input ion-input type="date" [(ngModel)]="startDate" />
-            </ion-item>
-          </ion-col>
-
-          <ion-col size="6">
-            <ion-item>
-              <ion-label position="stacked">End date</ion-label>
-              <input ion-input type="date" [(ngModel)]="endDate" />
-            </ion-item>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-          <ion-col size="12" style="text-align:right">
-            <ion-button (click)="onSubmit()" fill="solid">Submit</ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+        <!-- Dates and Button in one line -->
+        <ion-grid>
+          <ion-row style="align-items: flex-end;">
+            <ion-col size="12" size-md="4">
+              <ion-item lines="none" button="true" id="start-date-trigger">
+                <ion-label position="stacked">Start Date</ion-label>
+                <ion-input readonly="true" [value]="startDate" style="--padding-start: 10px;"></ion-input>
+                <ion-modal trigger="start-date-trigger">
+                  <ng-template>
+                    <ion-content>
+                      <ion-datetime presentation="date" [(ngModel)]="startDate" [max]="endDate || '2030-12-31'"
+                        (ionChange)="dismissModal('start')">
+                      </ion-datetime>
+                    </ion-content>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item lines="none" button="true" id="end-date-trigger">
+                <ion-label position="stacked">End Date</ion-label>
+                <ion-input readonly="true" [value]="endDate" style="--padding-start: 10px;"></ion-input>
+                <ion-modal trigger="end-date-trigger">
+                  <ng-template>
+                    <ion-content>
+                      <ion-datetime presentation="date" [(ngModel)]="endDate" [min]="startDate || '2000-01-01'"
+                        (ionChange)="dismissModal('end')">
+                      </ion-datetime>
+                    </ion-content>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-button class="action-button" expand="block" (click)="onSubmit()" style="margin-bottom: 4px;">
+                Calculate Returns
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
     </ion-card-content>
   </ion-card>
 
   <!-- Fund meta -->
-  <ion-card *ngIf="fundMeta && !loading">
+  <ion-card class="modern-card" *ngIf="fundMeta && !loading">
     <ion-card-header>
       <ion-card-title>{{ fundMeta.scheme_name || '-' }}</ion-card-title>
       <ion-card-subtitle>{{ fundMeta.fund_house || '-' }}</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-grid>
+      <ion-grid class="fund-meta-grid">
         <ion-row>
-          <ion-col size="6"><strong>Category</strong>
+          <ion-col size="6">
+            <strong>Category</strong>
             <div>{{ fundMeta.scheme_category || '-' }}</div>
           </ion-col>
-          <ion-col size="6"><strong>Type</strong>
+          <ion-col size="6">
+            <strong>Type</strong>
             <div>{{ fundMeta.scheme_type || '-' }}</div>
           </ion-col>
         </ion-row>
         <ion-row>
-          <ion-col size="6"><strong>Scheme Code</strong>
+          <ion-col size="6">
+            <strong>Scheme Code</strong>
             <div>{{ schemeCode || '-' }}</div>
           </ion-col>
-          <ion-col size="6"><strong>ISIN (Growth)</strong>
+          <ion-col size="6">
+            <strong>ISIN (Growth)</strong>
             <div>{{ fundMeta.isin_growth || '-' }}</div>
           </ion-col>
         </ion-row>
@@ -139,32 +177,32 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Comparison summary table: Data vs Daily SIP vs Weekly (Mon→Fri) vs Monthly SIP -->
-  <ion-card *ngIf="!loading && !error">
+  <!-- Comparison summary table -->
+  <ion-card class="modern-card" *ngIf="!loading && !error">
     <ion-card-header>
-      <ion-card-title>Compare: Data / Daily / Weekly (Mon→Fri) / Monthly</ion-card-title>
-      <ion-card-subtitle>Totals, Gains and Annualised returns</ion-card-subtitle>
+      <ion-card-title>Performance Comparison</ion-card-title>
+      <ion-card-subtitle>Compare returns across different investment frequencies</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-      <div class="table-wrapper" style="margin-top:6px;">
+      <div class="table-wrapper">
         <table class="mf-table">
           <thead>
             <tr>
               <th>Type</th>
-              <th>Total Invested (₹)</th>
+              <th>Total Invested</th>
               <th>Units</th>
-              <th>Current Value (₹)</th>
+              <th>Current Value</th>
               <th>Gain (₹)</th>
               <th>Gain %</th>
-              <th>Annualised Return</th>
+              <th>Ann. Return</th>
             </tr>
           </thead>
 
           <tbody>
             <!-- Data (buy & hold: 1 unit) -->
             <tr>
-              <td><strong>Data (1 unit)</strong>
+              <td><strong>Lump Sum (1 unit)</strong>
                 <div class="muted">buy 1 unit at {{ firstDate || '-' }}</div>
               </td>
               <td>₹{{ firstNav | number:'1.2-2' }}</td>
@@ -190,7 +228,7 @@
             </tr>
 
             <!-- Daily SIP -->
-            <tr>
+            <tr (click)="openDetails('daily')" style="cursor: pointer;" class="clickable-row">
               <td><strong>Daily SIP</strong>
                 <div class="muted">₹{{ investPerDay }} / day</div>
               </td>
@@ -205,14 +243,16 @@
               </td>
 
               <td>
-                <span *ngIf="totalInvested > 0" [ngClass]="{ 'pos': (totalGain/totalInvested*100) > 0, 'neg': (totalGain/totalInvested*100) < 0 }">
+                <span *ngIf="totalInvested > 0"
+                  [ngClass]="{ 'pos': (totalGain/totalInvested*100) > 0, 'neg': (totalGain/totalInvested*100) < 0 }">
                   {{ (totalGain / totalInvested * 100) | number:'1.2-2' }}%
                 </span>
                 <span *ngIf="totalInvested === 0">-</span>
               </td>
 
               <td>
-                <span *ngIf="portfolioAnnualisedReturn !== null" [ngClass]="{ 'pos': portfolioAnnualisedReturn > 0, 'neg': portfolioAnnualisedReturn < 0 }">
+                <span *ngIf="portfolioAnnualisedReturn !== null"
+                  [ngClass]="{ 'pos': portfolioAnnualisedReturn > 0, 'neg': portfolioAnnualisedReturn < 0 }">
                   {{ portfolioAnnualisedReturn | number:'1.2-2' }}%
                 </span>
                 <span *ngIf="portfolioAnnualisedReturn === null">-</span>
@@ -221,34 +261,44 @@
             </tr>
 
             <!-- Weekly SIP rows: Mon-Fri -->
-            <tr *ngFor="let w of weeklySummary">
+            <tr *ngFor="let w of weeklySummary" (click)="openDetails('weekly', w.weekday)" style="cursor: pointer;"
+              class="clickable-row">
               <td><strong>Weekly ({{ w.weekday }})</strong>
-                <div class="muted">₹{{ investPerWeek }} / week (pick {{ w.weekday }})</div>
+                <div class="muted">₹{{ investPerWeek }} / week</div>
               </td>
               <td>₹{{ w.totalInvested | number:'1.2-2' }}</td>
               <td>{{ w.totalUnits | number:'1.2-2' }}</td>
               <td [ngClass]="{ 'pos': w.currentValue > w.totalInvested, 'neg': w.currentValue < w.totalInvested }">
                 ₹{{ w.currentValue | number:'1.2-2' }}
               </td>
-              <td [ngClass]="{ 'pos': w.totalGain > 0, 'neg': w.totalGain < 0 }">₹{{ w.totalGain | number:'1.2-2' }}</td>
+              <td [ngClass]="{ 'pos': w.totalGain > 0, 'neg': w.totalGain < 0 }">₹{{ w.totalGain |
+                number:'1.2-2' }}
+              </td>
               <td>
-                <span *ngIf="w.totalInvested>0">{{ (w.totalGain / w.totalInvested * 100) | number:'1.2-2' }}%</span>
+                <span *ngIf="w.totalInvested>0"
+                  [ngClass]="{ 'pos': (w.totalGain/w.totalInvested*100) > 0, 'neg': (w.totalGain/w.totalInvested*100) < 0 }">
+                  {{ (w.totalGain / w.totalInvested * 100) | number:'1.2-2' }}%
+                </span>
                 <span *ngIf="w.totalInvested===0">-</span>
               </td>
               <td>
-                <span *ngIf="w.annualisedReturn !== null">{{ w.annualisedReturn | number:'1.2-2' }}%</span>
+                <span *ngIf="w.annualisedReturn !== null"
+                  [ngClass]="{ 'pos': w.annualisedReturn > 0, 'neg': w.annualisedReturn < 0 }">
+                  {{ w.annualisedReturn | number:'1.2-2' }}%
+                </span>
                 <span *ngIf="w.annualisedReturn === null">-</span>
               </td>
             </tr>
 
             <!-- Monthly SIP -->
-            <tr>
+            <tr (click)="openDetails('monthly')" style="cursor: pointer;" class="clickable-row">
               <td><strong>Monthly SIP</strong>
                 <div class="muted">₹{{ investPerMonth }} / month</div>
               </td>
               <td>₹{{ monthlyTotalInvested | number:'1.2-2' }}</td>
               <td>{{ monthlyTotalUnits | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': monthlyCurrentValue > monthlyTotalInvested, 'neg': monthlyCurrentValue < monthlyTotalInvested }">
+              <td
+                [ngClass]="{ 'pos': monthlyCurrentValue > monthlyTotalInvested, 'neg': monthlyCurrentValue < monthlyTotalInvested }">
                 ₹{{ monthlyCurrentValue | number:'1.2-2' }}
               </td>
 
@@ -293,10 +343,10 @@
   </ion-card>
 
   <!-- Year-wise summary including all weekdays -->
-  <ion-card *ngIf="!loading && !error && yearSummaries?.length">
+  <ion-card class="modern-card" *ngIf="!loading && !error && yearSummaries?.length">
     <ion-card-header>
-      <ion-card-title>Year-wise Comparison (Data / Daily SIP / Weekly Mon→Fri / Monthly SIP)</ion-card-title>
-      <ion-card-subtitle>For each year: data price returns and cumulative SIP / per-weekday totals / Monthly metrics</ion-card-subtitle>
+      <ion-card-title>Year-wise Comparison</ion-card-title>
+      <ion-card-subtitle>Detailed breakdown of returns by year</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
@@ -306,16 +356,16 @@
             <tr>
               <th rowspan="2">Year</th>
               <th colspan="3">Data (price)</th>
-              <th colspan="4">Daily SIP (cumulative)</th>
+              <th colspan="5">Daily SIP (cumulative)</th>
 
-              <!-- 5 weekdays × 4 cols each = 20 columns -->
-              <th colspan="4">Mon (Wk)</th>
-              <th colspan="4">Tue (Wk)</th>
-              <th colspan="4">Wed (Wk)</th>
-              <th colspan="4">Thu (Wk)</th>
-              <th colspan="4">Fri (Wk)</th>
+              <!-- 5 weekdays × 5 cols each = 25 columns -->
+              <th colspan="5">Mon (Wk)</th>
+              <th colspan="5">Tue (Wk)</th>
+              <th colspan="5">Wed (Wk)</th>
+              <th colspan="5">Thu (Wk)</th>
+              <th colspan="5">Fri (Wk)</th>
 
-              <th colspan="4">Monthly SIP (cumulative)</th>
+              <th colspan="5">Monthly SIP (cumulative)</th>
             </tr>
             <tr>
               <th>Start NAV</th>
@@ -326,18 +376,40 @@
               <th>Units</th>
               <th>Value (₹)</th>
               <th>Growth (₹)</th>
+              <th>% Gain</th>
 
-              <!-- weekdays headers (Invested / Units / Value / Growth) repeated -->
-              <th>Invested</th><th>Units</th><th>Value</th><th>Growth</th>
-              <th>Invested</th><th>Units</th><th>Value</th><th>Growth</th>
-              <th>Invested</th><th>Units</th><th>Value</th><th>Growth</th>
-              <th>Invested</th><th>Units</th><th>Value</th><th>Growth</th>
-              <th>Invested</th><th>Units</th><th>Value</th><th>Growth</th>
+              <!-- weekdays headers (Invested / Units / Value / Growth / % Gain) repeated -->
+              <th>Invested</th>
+              <th>Units</th>
+              <th>Value</th>
+              <th>Growth</th>
+              <th>% Gain</th>
+              <th>Invested</th>
+              <th>Units</th>
+              <th>Value</th>
+              <th>Growth</th>
+              <th>% Gain</th>
+              <th>Invested</th>
+              <th>Units</th>
+              <th>Value</th>
+              <th>Growth</th>
+              <th>% Gain</th>
+              <th>Invested</th>
+              <th>Units</th>
+              <th>Value</th>
+              <th>Growth</th>
+              <th>% Gain</th>
+              <th>Invested</th>
+              <th>Units</th>
+              <th>Value</th>
+              <th>Growth</th>
+              <th>% Gain</th>
 
               <th>Invested (₹)</th>
               <th>Units</th>
               <th>Value (₹)</th>
               <th>Growth (₹)</th>
+              <th>% Gain</th>
             </tr>
           </thead>
           <tbody>
@@ -348,7 +420,8 @@
               <td>{{ y.dataStartNav != null ? (y.dataStartNav | number:'1.2-2') : '-' }}</td>
               <td>{{ y.dataEndNav != null ? (y.dataEndNav | number:'1.2-2') : '-' }}</td>
               <td>
-                <span *ngIf="y.dataReturnPct != null" [ngClass]="{ 'pos': y.dataReturnPct > 0, 'neg': y.dataReturnPct < 0 }">
+                <span *ngIf="y.dataReturnPct != null"
+                  [ngClass]="{ 'pos': y.dataReturnPct > 0, 'neg': y.dataReturnPct < 0 }">
                   {{ y.dataReturnPct | number:'1.2-2' }}%
                 </span>
                 <span *ngIf="y.dataReturnPct == null">-</span>
@@ -356,59 +429,154 @@
 
               <!-- Daily SIP -->
               <td>₹{{ y.investmentTill | number:'1.2-2' }}</td>
-              <td>{{ y.unitsTill | number:'1.6-6' }}</td>
+              <td>{{ y.unitsTill | number:'1.2-2' }}</td>
               <td>₹{{ y.currentValueTill | number:'1.2-2' }}</td>
               <td>₹{{ y.growthTill | number:'1.2-2' }}</td>
+              <td>
+                <span *ngIf="y.investmentTill > 0"
+                  [ngClass]="{ 'pos': (y.growthTill / y.investmentTill * 100) > 0, 'neg': (y.growthTill / y.investmentTill * 100) < 0 }">
+                  {{ (y.growthTill / y.investmentTill * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="y.investmentTill === 0">-</span>
+              </td>
 
-              <!-- Mon (use bracket notation for index signature) -->
+              <!-- Mon -->
               <td>₹{{ (y.weeklyByWeekday?.['Mon']?.investmentTill || 0) | number:'1.2-2' }}</td>
-              <td>{{ (y.weeklyByWeekday?.['Mon']?.unitsTill || 0) | number:'1.6-6' }}</td>
+              <td>{{ (y.weeklyByWeekday?.['Mon']?.unitsTill || 0) | number:'1.2-2' }}</td>
               <td>₹{{ (y.weeklyByWeekday?.['Mon']?.currentValueTill || 0) | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) < 0) }">
+              <td
+                [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) < 0) }">
                 ₹{{ (y.weeklyByWeekday?.['Mon']?.growthTill || 0) | number:'1.2-2' }}
+              </td>
+              <td>
+                <span *ngIf="(y.weeklyByWeekday?.['Mon']?.investmentTill || 0) > 0"
+                  [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) / (y.weeklyByWeekday?.['Mon']?.investmentTill || 1) * 100) > 0, 'neg': ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) / (y.weeklyByWeekday?.['Mon']?.investmentTill || 1) * 100) < 0 }">
+                  {{ ((y.weeklyByWeekday?.['Mon']?.growthTill || 0) / (y.weeklyByWeekday?.['Mon']?.investmentTill || 1)
+                  * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="(y.weeklyByWeekday?.['Mon']?.investmentTill || 0) === 0">-</span>
               </td>
 
               <!-- Tue -->
               <td>₹{{ (y.weeklyByWeekday?.['Tue']?.investmentTill || 0) | number:'1.2-2' }}</td>
-              <td>{{ (y.weeklyByWeekday?.['Tue']?.unitsTill || 0) | number:'1.6-6' }}</td>
+              <td>{{ (y.weeklyByWeekday?.['Tue']?.unitsTill || 0) | number:'1.2-2' }}</td>
               <td>₹{{ (y.weeklyByWeekday?.['Tue']?.currentValueTill || 0) | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) < 0) }">
+              <td
+                [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) < 0) }">
                 ₹{{ (y.weeklyByWeekday?.['Tue']?.growthTill || 0) | number:'1.2-2' }}
+              </td>
+              <td>
+                <span *ngIf="(y.weeklyByWeekday?.['Tue']?.investmentTill || 0) > 0"
+                  [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) / (y.weeklyByWeekday?.['Tue']?.investmentTill || 1) * 100) > 0, 'neg': ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) / (y.weeklyByWeekday?.['Tue']?.investmentTill || 1) * 100) < 0 }">
+                  {{ ((y.weeklyByWeekday?.['Tue']?.growthTill || 0) / (y.weeklyByWeekday?.['Tue']?.investmentTill || 1)
+                  * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="(y.weeklyByWeekday?.['Tue']?.investmentTill || 0) === 0">-</span>
               </td>
 
               <!-- Wed -->
               <td>₹{{ (y.weeklyByWeekday?.['Wed']?.investmentTill || 0) | number:'1.2-2' }}</td>
-              <td>{{ (y.weeklyByWeekday?.['Wed']?.unitsTill || 0) | number:'1.6-6' }}</td>
+              <td>{{ (y.weeklyByWeekday?.['Wed']?.unitsTill || 0) | number:'1.2-2' }}</td>
               <td>₹{{ (y.weeklyByWeekday?.['Wed']?.currentValueTill || 0) | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) < 0) }">
+              <td
+                [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) < 0) }">
                 ₹{{ (y.weeklyByWeekday?.['Wed']?.growthTill || 0) | number:'1.2-2' }}
+              </td>
+              <td>
+                <span *ngIf="(y.weeklyByWeekday?.['Wed']?.investmentTill || 0) > 0"
+                  [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) / (y.weeklyByWeekday?.['Wed']?.investmentTill || 1) * 100) > 0, 'neg': ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) / (y.weeklyByWeekday?.['Wed']?.investmentTill || 1) * 100) < 0 }">
+                  {{ ((y.weeklyByWeekday?.['Wed']?.growthTill || 0) / (y.weeklyByWeekday?.['Wed']?.investmentTill || 1)
+                  * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="(y.weeklyByWeekday?.['Wed']?.investmentTill || 0) === 0">-</span>
               </td>
 
               <!-- Thu -->
               <td>₹{{ (y.weeklyByWeekday?.['Thu']?.investmentTill || 0) | number:'1.2-2' }}</td>
-              <td>{{ (y.weeklyByWeekday?.['Thu']?.unitsTill || 0) | number:'1.6-6' }}</td>
+              <td>{{ (y.weeklyByWeekday?.['Thu']?.unitsTill || 0) | number:'1.2-2' }}</td>
               <td>₹{{ (y.weeklyByWeekday?.['Thu']?.currentValueTill || 0) | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) < 0) }">
+              <td
+                [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) < 0) }">
                 ₹{{ (y.weeklyByWeekday?.['Thu']?.growthTill || 0) | number:'1.2-2' }}
+              </td>
+              <td>
+                <span *ngIf="(y.weeklyByWeekday?.['Thu']?.investmentTill || 0) > 0"
+                  [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) / (y.weeklyByWeekday?.['Thu']?.investmentTill || 1) * 100) > 0, 'neg': ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) / (y.weeklyByWeekday?.['Thu']?.investmentTill || 1) * 100) < 0 }">
+                  {{ ((y.weeklyByWeekday?.['Thu']?.growthTill || 0) / (y.weeklyByWeekday?.['Thu']?.investmentTill || 1)
+                  * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="(y.weeklyByWeekday?.['Thu']?.investmentTill || 0) === 0">-</span>
               </td>
 
               <!-- Fri -->
               <td>₹{{ (y.weeklyByWeekday?.['Fri']?.investmentTill || 0) | number:'1.2-2' }}</td>
-              <td>{{ (y.weeklyByWeekday?.['Fri']?.unitsTill || 0) | number:'1.6-6' }}</td>
+              <td>{{ (y.weeklyByWeekday?.['Fri']?.unitsTill || 0) | number:'1.2-2' }}</td>
               <td>₹{{ (y.weeklyByWeekday?.['Fri']?.currentValueTill || 0) | number:'1.2-2' }}</td>
-              <td [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) < 0) }">
+              <td
+                [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) > 0), 'neg': ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) < 0) }">
                 ₹{{ (y.weeklyByWeekday?.['Fri']?.growthTill || 0) | number:'1.2-2' }}
+              </td>
+              <td>
+                <span *ngIf="(y.weeklyByWeekday?.['Fri']?.investmentTill || 0) > 0"
+                  [ngClass]="{ 'pos': ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) / (y.weeklyByWeekday?.['Fri']?.investmentTill || 1) * 100) > 0, 'neg': ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) / (y.weeklyByWeekday?.['Fri']?.investmentTill || 1) * 100) < 0 }">
+                  {{ ((y.weeklyByWeekday?.['Fri']?.growthTill || 0) / (y.weeklyByWeekday?.['Fri']?.investmentTill || 1)
+                  * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="(y.weeklyByWeekday?.['Fri']?.investmentTill || 0) === 0">-</span>
               </td>
 
               <!-- Monthly -->
-              <td>₹{{ y.monthlyInvestmentTill | number:'1.2-2' }}</td>
-              <td>{{ y.monthlyUnitsTill | number:'1.6-6' }}</td>
-              <td>₹{{ y.monthlyCurrentValueTill | number:'1.2-2' }}</td>
-              <td>₹{{ y.monthlyGrowthTill | number:'1.2-2' }}</td>
+              <td>₹{{ (y.monthlyInvestmentTill ?? 0) | number:'1.2-2' }}</td>
+              <td>{{ (y.monthlyUnitsTill ?? 0) | number:'1.2-2' }}</td>
+              <td>₹{{ (y.monthlyCurrentValueTill ?? 0) | number:'1.2-2' }}</td>
+              <td>₹{{ (y.monthlyGrowthTill ?? 0) | number:'1.2-2' }}</td>
+              <td>
+                <span *ngIf="(y.monthlyInvestmentTill ?? 0) > 0"
+                  [ngClass]="{ 'pos': ((y.monthlyGrowthTill ?? 0) / (y.monthlyInvestmentTill ?? 1) * 100) > 0, 'neg': ((y.monthlyGrowthTill ?? 0) / (y.monthlyInvestmentTill ?? 1) * 100) < 0 }">
+                  {{ ((y.monthlyGrowthTill ?? 0) / (y.monthlyInvestmentTill ?? 1) * 100) | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="(y.monthlyInvestmentTill ?? 0) === 0">-</span>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </ion-card-content>
   </ion-card>
+
+  <!-- Details Modal -->
+  <ion-modal [isOpen]="showDetails" (didDismiss)="closeDetails()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ selectedSipTitle }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeDetails()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <div class="table-wrapper" style="padding: 16px;">
+          <table class="mf-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>NAV (₹)</th>
+                <th>Invested (₹)</th>
+                <th>Units Bought</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let record of selectedSipDetails">
+                <td>{{ record.date }}</td>
+                <td>{{ record.nav | number:'1.2-2' }}</td>
+                <td>{{ record.amount | number:'1.2-2' }}</td>
+                <td>{{ record.units | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

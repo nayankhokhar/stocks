@@ -1,39 +1,215 @@
+:host {
+  --page-background: #f4f5f8;
+  --card-background: #ffffff;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --border-radius: 16px;
+  --text-color-primary: #1f2937;
+  --text-color-secondary: #6b7280;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+}
+
+ion-content {
+  --background: var(--page-background);
+}
+
+.main-header {
+  background: var(--primary-gradient);
+  color: white;
+
+  ion-title {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  ion-button {
+    --color: white;
+  }
+}
+
+.modern-card {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  margin: 16px;
+  border: none;
+  overflow: hidden;
+
+  ion-card-header {
+    padding: 20px 20px 10px;
+
+    ion-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-color-primary);
+    }
+
+    ion-card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-color-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+  }
+
+  ion-card-content {
+    padding: 0 20px 20px;
+  }
+}
+
+.search-section {
+  ion-item {
+    --background: #f9fafb;
+    --border-radius: 12px;
+    --padding-start: 16px;
+    margin-bottom: 0;
+
+    ion-input {
+      font-size: 1rem;
+    }
+  }
+}
+
+.input-group {
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 12px;
+
+    ion-label {
+      color: var(--text-color-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    ion-input,
+    input {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      width: 100%;
+      font-size: 1rem;
+      color: var(--text-color-primary);
+
+      &:focus {
+        border-color: #667eea;
+        outline: none;
+      }
+    }
+  }
+}
+
+.action-button {
+  --background: var(--primary-gradient);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 16px;
+  height: 48px;
+}
+
+.fund-meta-grid {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+
+  ion-col {
+    margin-bottom: 12px;
+
+    strong {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-color-secondary);
+      margin-bottom: 4px;
+    }
+
+    div {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+  }
+}
+
 .table-wrapper {
-    overflow-x: auto;
-    padding-bottom: 8px;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-top: 16px;
 }
 
 .mf-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    white-space: nowrap;
-}
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
 
-.mf-table th,
-.mf-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--ion-color-light-contrast);
-    font-size: 13px;
-}
+  thead {
+    background: #f9fafb;
 
-.mf-table thead th {
-    font-weight: 600;
-    background: transparent;
+    th {
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-color-secondary);
+      border-bottom: 1px solid #e5e7eb;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #f3f4f6;
+      transition: background-color 0.2s;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: #f9fafb;
+      }
+    }
+
+    td {
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      color: var(--text-color-primary);
+
+      strong {
+        font-weight: 600;
+      }
+    }
+  }
 }
 
 .muted {
-    font-size: 11px;
-    color: var(--ion-color-medium);
-    margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  margin-top: 2px;
+  display: block;
 }
 
-/* small table cells for nested (if used) */
-.mf-table.small th, .mf-table.small td {
-  padding: 6px 8px;
-  font-size: 12px;
+.pos {
+  color: var(--success-color) !important;
+  font-weight: 600;
 }
 
-.nested-weekday-row td {
-  background: rgba(0,0,0,0.02);
+.neg {
+  color: var(--danger-color) !important;
+  font-weight: 600;
+}
+
+.blue {
+  color: #3b82f6;
+  font-weight: 600;
 }
