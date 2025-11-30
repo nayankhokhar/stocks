@@ -229,7 +229,8 @@
 
             <!-- Daily SIP -->
             <tr (click)="openDetails('daily')" style="cursor: pointer;" class="clickable-row">
-              <td><strong>Daily SIP</strong>
+              <td><strong>Daily SIP <ion-icon name="eye-outline"
+                    style="margin-left: 5px; vertical-align: middle;"></ion-icon></strong>
                 <div class="muted">₹{{ investPerDay }} / day</div>
               </td>
               <td>₹{{ totalInvested | number:'1.2-2' }}</td>
@@ -263,7 +264,8 @@
             <!-- Weekly SIP rows: Mon-Fri -->
             <tr *ngFor="let w of weeklySummary" (click)="openDetails('weekly', w.weekday)" style="cursor: pointer;"
               class="clickable-row">
-              <td><strong>Weekly ({{ w.weekday }})</strong>
+              <td><strong>Weekly ({{ w.weekday }})<ion-icon name="eye-outline"
+                    style="margin-left: 5px; vertical-align: middle;"></ion-icon></strong>
                 <div class="muted">₹{{ investPerWeek }} / week</div>
               </td>
               <td>₹{{ w.totalInvested | number:'1.2-2' }}</td>
@@ -292,7 +294,8 @@
 
             <!-- Monthly SIP -->
             <tr (click)="openDetails('monthly')" style="cursor: pointer;" class="clickable-row">
-              <td><strong>Monthly SIP</strong>
+              <td><strong>Monthly SIP<ion-icon name="eye-outline"
+                    style="margin-left: 5px; vertical-align: middle;"></ion-icon></strong>
                 <div class="muted">₹{{ investPerMonth }} / month</div>
               </td>
               <td>₹{{ monthlyTotalInvested | number:'1.2-2' }}</td>
