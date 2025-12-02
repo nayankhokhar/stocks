@@ -72,6 +72,8 @@ ion-content {
 }
 
 .input-group {
+  display: block;
+
   ion-item {
     --background: transparent;
     --padding-start: 0;
@@ -212,4 +214,8 @@ ion-content {
 .blue {
   color: #3b82f6;
   font-weight: 600;
+}
+
+ion-row {
+  flex-wrap: wrap !important;
 }

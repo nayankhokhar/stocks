@@ -1,14 +1,3 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar class="main-header">
-    <ion-title>Mutual Fund SIP Calculator</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="fetchData()">
-        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
   <!-- --- Search bar --- -->
   <ion-card class="modern-card">
@@ -105,14 +94,15 @@
         <ion-grid>
           <ion-row style="align-items: flex-end;">
             <ion-col size="12" size-md="4">
-              <ion-item lines="none" button="true" id="start-date-trigger">
+              <ion-item lines="none" id="start-date-trigger">
                 <ion-label position="stacked">Start Date</ion-label>
                 <ion-input readonly="true" [value]="startDate" style="--padding-start: 10px;"></ion-input>
                 <ion-modal trigger="start-date-trigger">
                   <ng-template>
                     <ion-content>
                       <ion-datetime presentation="date" [(ngModel)]="startDate" [max]="endDate || '2030-12-31'"
-                        (ionChange)="dismissModal('start')">
+                        showDefaultButtons="true" (ionChange)="dismissModal('start')"
+                        (ionCancel)="dismissModal('start')">
                       </ion-datetime>
                     </ion-content>
                   </ng-template>
@@ -120,14 +110,14 @@
               </ion-item>
             </ion-col>
             <ion-col size="12" size-md="4">
-              <ion-item lines="none" button="true" id="end-date-trigger">
+              <ion-item lines="none" id="end-date-trigger">
                 <ion-label position="stacked">End Date</ion-label>
                 <ion-input readonly="true" [value]="endDate" style="--padding-start: 10px;"></ion-input>
                 <ion-modal trigger="end-date-trigger">
                   <ng-template>
                     <ion-content>
                       <ion-datetime presentation="date" [(ngModel)]="endDate" [min]="startDate || '2000-01-01'"
-                        (ionChange)="dismissModal('end')">
+                        showDefaultButtons="true" (ionChange)="dismissModal('end')" (ionCancel)="dismissModal('end')">
                       </ion-datetime>
                     </ion-content>
                   </ng-template>
@@ -135,7 +125,7 @@
               </ion-item>
             </ion-col>
             <ion-col size="12" size-md="4">
-              <ion-button class="action-button" expand="block" (click)="onSubmit()" style="margin-bottom: 4px;">
+              <ion-button class="action-button" expand="block" (click)="onSubmit()" style="margin-bottom: 12px;">
                 Calculate Returns
               </ion-button>
             </ion-col>
