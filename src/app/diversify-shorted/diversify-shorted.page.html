@@ -42,24 +42,10 @@
               <!-- 1 Year -->
               <td class="metrics-cell">
                 <div class="metric-row">
-                  <span class="label">Ann:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.oneYear?.cagr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.oneYear?.cagr || '0') < 0">
-                    {{ fund.performance?.oneYear?.cagr }}
-                  </span>
-                </div>
-                <div class="metric-row">
                   <span class="label">Avg:</span>
                   <span class="value" [class.positive]="parseFloat(fund.performance?.oneYear?.avg || '0') > 0"
                     [class.negative]="parseFloat(fund.performance?.oneYear?.avg || '0') < 0">
                     {{ fund.performance?.oneYear?.avg }}
-                  </span>
-                </div>
-                <div class="metric-row">
-                  <span class="label">XIRR:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.oneYear?.xirr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.oneYear?.xirr || '0') < 0">
-                    {{ fund.performance?.oneYear?.xirr }}
                   </span>
                 </div>
                 <div class="metric-row">
@@ -77,29 +63,73 @@
                   <span class="label">End:</span>
                   <span class="value">{{ fund.performance?.oneYear?.endNav }}</span>
                 </div>
+
+                <!-- Daily SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">dSIP(100):</span>
+                    <span class="value">{{ fund.performance?.oneYear?.dailySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.oneYear?.dailySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.oneYear?.dailySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.oneYear?.dailySip?.return || '0') < 0">
+                      {{ fund.performance?.oneYear?.dailySip?.gain }} ({{ fund.performance?.oneYear?.dailySip?.return
+                      }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.oneYear?.dailySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.oneYear?.dailySip?.xirr || '0') < 0">
+                      {{ fund.performance?.oneYear?.dailySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Monthly SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">mSIP(2k):</span>
+                    <span class="value">{{ fund.performance?.oneYear?.monthlySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.oneYear?.monthlySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.oneYear?.monthlySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.oneYear?.monthlySip?.return || '0') < 0">
+                      {{ fund.performance?.oneYear?.monthlySip?.gain }} ({{
+                      fund.performance?.oneYear?.monthlySip?.return }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.oneYear?.monthlySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.oneYear?.monthlySip?.xirr || '0') < 0">
+                      {{ fund.performance?.oneYear?.monthlySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
               </td>
 
               <!-- 3 Year -->
               <td class="metrics-cell">
                 <div class="metric-row">
-                  <span class="label">Ann:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.threeYear?.cagr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.threeYear?.cagr || '0') < 0">
-                    {{ fund.performance?.threeYear?.cagr }}
-                  </span>
-                </div>
-                <div class="metric-row">
                   <span class="label">Avg:</span>
                   <span class="value" [class.positive]="parseFloat(fund.performance?.threeYear?.avg || '0') > 0"
                     [class.negative]="parseFloat(fund.performance?.threeYear?.avg || '0') < 0">
                     {{ fund.performance?.threeYear?.avg }}
-                  </span>
-                </div>
-                <div class="metric-row">
-                  <span class="label">XIRR:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.threeYear?.xirr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.threeYear?.xirr || '0') < 0">
-                    {{ fund.performance?.threeYear?.xirr }}
                   </span>
                 </div>
                 <div class="metric-row">
@@ -117,29 +147,73 @@
                   <span class="label">End:</span>
                   <span class="value">{{ fund.performance?.threeYear?.endNav }}</span>
                 </div>
+
+                <!-- Daily SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">dSIP(100):</span>
+                    <span class="value">{{ fund.performance?.threeYear?.dailySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.threeYear?.dailySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.threeYear?.dailySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.threeYear?.dailySip?.return || '0') < 0">
+                      {{ fund.performance?.threeYear?.dailySip?.gain }} ({{
+                      fund.performance?.threeYear?.dailySip?.return }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.threeYear?.dailySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.threeYear?.dailySip?.xirr || '0') < 0">
+                      {{ fund.performance?.threeYear?.dailySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Monthly SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">mSIP(2k):</span>
+                    <span class="value">{{ fund.performance?.threeYear?.monthlySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.threeYear?.monthlySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.threeYear?.monthlySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.threeYear?.monthlySip?.return || '0') < 0">
+                      {{ fund.performance?.threeYear?.monthlySip?.gain }} ({{
+                      fund.performance?.threeYear?.monthlySip?.return }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.threeYear?.monthlySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.threeYear?.monthlySip?.xirr || '0') < 0">
+                      {{ fund.performance?.threeYear?.monthlySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
               </td>
 
               <!-- 5 Year -->
               <td class="metrics-cell">
                 <div class="metric-row">
-                  <span class="label">Ann:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.fiveYear?.cagr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.fiveYear?.cagr || '0') < 0">
-                    {{ fund.performance?.fiveYear?.cagr }}
-                  </span>
-                </div>
-                <div class="metric-row">
                   <span class="label">Avg:</span>
                   <span class="value" [class.positive]="parseFloat(fund.performance?.fiveYear?.avg || '0') > 0"
                     [class.negative]="parseFloat(fund.performance?.fiveYear?.avg || '0') < 0">
                     {{ fund.performance?.fiveYear?.avg }}
-                  </span>
-                </div>
-                <div class="metric-row">
-                  <span class="label">XIRR:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.fiveYear?.xirr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.fiveYear?.xirr || '0') < 0">
-                    {{ fund.performance?.fiveYear?.xirr }}
                   </span>
                 </div>
                 <div class="metric-row">
@@ -157,29 +231,73 @@
                   <span class="label">End:</span>
                   <span class="value">{{ fund.performance?.fiveYear?.endNav }}</span>
                 </div>
+
+                <!-- Daily SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">dSIP(100):</span>
+                    <span class="value">{{ fund.performance?.fiveYear?.dailySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.fiveYear?.dailySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.fiveYear?.dailySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.fiveYear?.dailySip?.return || '0') < 0">
+                      {{ fund.performance?.fiveYear?.dailySip?.gain }} ({{ fund.performance?.fiveYear?.dailySip?.return
+                      }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.fiveYear?.dailySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.fiveYear?.dailySip?.xirr || '0') < 0">
+                      {{ fund.performance?.fiveYear?.dailySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Monthly SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">mSIP(2k):</span>
+                    <span class="value">{{ fund.performance?.fiveYear?.monthlySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.fiveYear?.monthlySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.fiveYear?.monthlySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.fiveYear?.monthlySip?.return || '0') < 0">
+                      {{ fund.performance?.fiveYear?.monthlySip?.gain }} ({{
+                      fund.performance?.fiveYear?.monthlySip?.return }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.fiveYear?.monthlySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.fiveYear?.monthlySip?.xirr || '0') < 0">
+                      {{ fund.performance?.fiveYear?.monthlySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
               </td>
 
               <!-- Total -->
               <td class="metrics-cell">
                 <div class="metric-row">
-                  <span class="label">Ann:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.total?.cagr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.total?.cagr || '0') < 0">
-                    {{ fund.performance?.total?.cagr }}
-                  </span>
-                </div>
-                <div class="metric-row">
                   <span class="label">Avg:</span>
                   <span class="value" [class.positive]="parseFloat(fund.performance?.total?.avg || '0') > 0"
                     [class.negative]="parseFloat(fund.performance?.total?.avg || '0') < 0">
                     {{ fund.performance?.total?.avg }}
-                  </span>
-                </div>
-                <div class="metric-row">
-                  <span class="label">XIRR:</span>
-                  <span class="value" [class.positive]="parseFloat(fund.performance?.total?.xirr || '0') > 0"
-                    [class.negative]="parseFloat(fund.performance?.total?.xirr || '0') < 0">
-                    {{ fund.performance?.total?.xirr }}
                   </span>
                 </div>
                 <div class="metric-row">
@@ -196,6 +314,63 @@
                 <div class="metric-row">
                   <span class="label">End:</span>
                   <span class="value">{{ fund.performance?.total?.endNav }}</span>
+                </div>
+
+                <!-- Daily SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">dSIP(100):</span>
+                    <span class="value">{{ fund.performance?.total?.dailySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.total?.dailySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.total?.dailySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.total?.dailySip?.return || '0') < 0">
+                      {{ fund.performance?.total?.dailySip?.gain }} ({{ fund.performance?.total?.dailySip?.return }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.total?.dailySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.total?.dailySip?.xirr || '0') < 0">
+                      {{ fund.performance?.total?.dailySip?.xirr }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Monthly SIP -->
+                <div class="metric-group">
+                  <div class="metric-row header">
+                    <span class="label">mSIP(2k):</span>
+                    <span class="value">{{ fund.performance?.total?.monthlySip?.value }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Inv:</span>
+                    <span class="value">{{ fund.performance?.total?.monthlySip?.investment }}</span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">Gain:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.total?.monthlySip?.return || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.total?.monthlySip?.return || '0') < 0">
+                      {{ fund.performance?.total?.monthlySip?.gain }} ({{ fund.performance?.total?.monthlySip?.return
+                      }})
+                    </span>
+                  </div>
+                  <div class="metric-row sub">
+                    <span class="label">XIRR:</span>
+                    <span class="value"
+                      [class.positive]="parseFloat(fund.performance?.total?.monthlySip?.xirr || '0') > 0"
+                      [class.negative]="parseFloat(fund.performance?.total?.monthlySip?.xirr || '0') < 0">
+                      {{ fund.performance?.total?.monthlySip?.xirr }}
+                    </span>
+                  </div>
                 </div>
               </td>
 

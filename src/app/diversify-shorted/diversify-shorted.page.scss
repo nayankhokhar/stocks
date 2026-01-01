@@ -144,6 +144,50 @@ ion-content {
                 }
               }
             }
+
+            .metric-group {
+              background: #f8f9fa;
+              border-radius: 6px;
+              padding: 8px;
+              margin-top: 8px;
+              border: 1px solid #e9ecef;
+
+              .metric-row {
+                margin-bottom: 4px;
+
+                &:last-child {
+                  margin-bottom: 0;
+                }
+
+                &.header {
+                  margin-bottom: 6px;
+                  border-bottom: 1px dashed #dee2e6;
+                  padding-bottom: 4px;
+
+                  .label {
+                    font-weight: 700;
+                    color: #5e72e4;
+                    font-size: 14px;
+                  }
+
+                  .value {
+                    font-size: 15px;
+                    color: #1a1a2e;
+                  }
+                }
+
+                &.sub {
+                  .label {
+                    font-size: 12px;
+                  }
+
+                  .value {
+                    font-size: 13px;
+                    font-weight: 500;
+                  }
+                }
+              }
+            }
           }
 
           &.meta-cell {

@@ -3,6 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+interface SipMetrics {
+  investment: string;
+  value: string;
+  gain: string;
+  return: string;
+  xirr: string;
+}
+
 interface ReturnMetrics {
   cagr: string;
   avg: string;
@@ -10,6 +18,8 @@ interface ReturnMetrics {
   abs: string;
   startNav: string;
   endNav: string;
+  dailySip: SipMetrics;
+  monthlySip: SipMetrics;
 }
 
 interface MutualFund {
@@ -35,10 +45,11 @@ interface MutualFund {
 export class DiversifyShortedPage implements OnInit {
 
   bestFunds: MutualFund[] = [
-    { code: '122639', name: 'Parag Parikh Flexi Cap Fund', expenseRatio: '0.66%', exitLoad: '2% for < 365 days' },
-    { code: '120828', name: 'Quant Active Fund', expenseRatio: '0.58%', exitLoad: 'Nil' },
-    { code: '120465', name: 'Nippon India Small Cap Fund', expenseRatio: '0.70%', exitLoad: '1% for < 30 days' },
-    { code: '119063', name: 'SBI Nifty 50 ETF', expenseRatio: '0.07%', exitLoad: 'Nil' }
+    // { code: '122639', name: 'Parag Parikh Flexi Cap Fund', expenseRatio: '0.66%', exitLoad: '2% for < 365 days' },
+    // { code: '120828', name: 'Quant Active Fund', expenseRatio: '0.58%', exitLoad: 'Nil' },
+    // { code: '120465', name: 'Nippon India Small Cap Fund', expenseRatio: '0.70%', exitLoad: '1% for < 30 days' },
+    // { code: '119063', name: 'SBI Nifty 50 ETF', expenseRatio: '0.07%', exitLoad: 'Nil' },
+    { code: '120586', name: 'ICICI Prudential Large Cap Fund', expenseRatio: '0.07%', exitLoad: 'Nil' }
   ];
 
   allFundsData: MutualFund[] = [];
@@ -63,10 +74,10 @@ export class DiversifyShortedPage implements OnInit {
             name: res.meta ? res.meta.scheme_name : fund.name,
             meta: res.meta,
             performance: { // Initialize with empty defaults
-              oneYear: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' },
-              threeYear: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' },
-              fiveYear: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' },
-              total: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' }
+              oneYear: this.getEmptyMetrics(),
+              threeYear: this.getEmptyMetrics(),
+              fiveYear: this.getEmptyMetrics(),
+              total: this.getEmptyMetrics()
             }
           };
 
@@ -89,6 +100,11 @@ export class DiversifyShortedPage implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  getEmptyMetrics(): ReturnMetrics {
+    const emptySip = { investment: '-', value: '-', gain: '-', return: '-', xirr: '-' };
+    return { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-', dailySip: emptySip, monthlySip: emptySip };
   }
 
   parseFloat(value: string): number {
@@ -126,14 +142,9 @@ export class DiversifyShortedPage implements OnInit {
       }
 
       // Find closest record in history that is <= targetDate
-      // processedData is descending new -> old
-      // We want the newest date that is still older than targetDate? 
-      // Or strictly the date closest to targetDate? 
-      // Usually, point-to-point uses the NAV on that exact date or previous available.
-      // Since list is descending, we search from start until we find date <= target
       const record = processedData.find(d => d.date <= targetDate);
 
-      if (!record || periodYears <= 0) return { cagr: 'N/A', avg: 'N/A', xirr: 'N/A', abs: 'N/A', startNav: 'N/A', endNav: 'N/A' };
+      if (!record || periodYears <= 0) return this.getEmptyMetrics();
 
       // 1. CAGR (Annual Return) -> Point to Point
       // Formula: (Current/Old)^(1/n) - 1
@@ -145,8 +156,13 @@ export class DiversifyShortedPage implements OnInit {
       const avgVal = absReturn / periodYears;
 
       // 3. XIRR -> SIP Scenario
-      // Generate monthly dates from targetDate to currentDate
       const xirrVal = this.calculateSIPXIRR(processedData, targetDate, currentDate, currentNav);
+
+      // 4. Daily SIP (100)
+      const dailySipVal = this.calculateSIPValue(processedData, targetDate, currentDate, currentNav, 100, 'daily');
+
+      // 5. Monthly SIP (2000)
+      const monthlySipVal = this.calculateSIPValue(processedData, targetDate, currentDate, currentNav, 2000, 'monthly');
 
       const formatDate = (date: Date) => {
         const day = date.getDate().toString().padStart(2, '0');
@@ -161,7 +177,9 @@ export class DiversifyShortedPage implements OnInit {
         xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A',
         abs: absReturn.toFixed(2) + '%',
         startNav: '₹' + record.nav.toFixed(2) + ' (' + formatDate(record.date) + ')',
-        endNav: '₹' + currentNav.toFixed(2) + ' (' + formatDate(currentDate) + ')'
+        endNav: '₹' + currentNav.toFixed(2) + ' (' + formatDate(currentDate) + ')',
+        dailySip: dailySipVal,
+        monthlySip: monthlySipVal
       };
     };
 
@@ -173,6 +191,56 @@ export class DiversifyShortedPage implements OnInit {
     }
   }
 
+  calculateSIPValue(data: any[], startDate: Date, endDate: Date, currentNav: number, amount: number, frequency: 'daily' | 'monthly'): SipMetrics {
+    let totalUnits = 0;
+    let totalInvestment = 0;
+    const cashFlows: { amount: number, date: Date }[] = [];
+
+    if (frequency === 'daily') {
+      // Iterate all records between startDate and endDate in descending data
+      for (const record of data) {
+        if (record.date >= startDate && record.date < endDate) {
+          totalUnits += amount / record.nav;
+          totalInvestment += amount;
+          cashFlows.push({ amount: -amount, date: record.date });
+        }
+        if (record.date < startDate) break;
+      }
+    } else {
+      // Monthly
+      let dateIter = new Date(startDate);
+      while (dateIter < endDate) {
+        const record = data.find(d => d.date <= dateIter);
+        if (record) {
+          totalUnits += amount / record.nav;
+          totalInvestment += amount;
+          cashFlows.push({ amount: -amount, date: record.date }); // Use record date for accuracy or dateIter? Record date is safer for nav match
+        }
+        dateIter.setMonth(dateIter.getMonth() + 1);
+      }
+    }
+
+    const currentValue = totalUnits * currentNav;
+    const gain = currentValue - totalInvestment;
+    const absReturn = totalInvestment > 0 ? (gain / totalInvestment) * 100 : 0;
+
+    // Calculate XIRR
+    // Add final value as positive cashflow
+    const xirrFlows = [...cashFlows, { amount: currentValue, date: endDate }];
+    const xirrVal = this.computeXIRR(xirrFlows);
+
+    // Formatting helper
+    const fmt = (num: number) => '₹' + Math.round(num).toLocaleString('en-IN');
+
+    return {
+      investment: fmt(totalInvestment),
+      value: fmt(currentValue),
+      gain: fmt(gain),
+      return: absReturn.toFixed(2) + '%',
+      xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A'
+    };
+  }
+
   // Calculate XIRR for a standard Monthly SIP scenario
   calculateSIPXIRR(data: any[], startDate: Date, endDate: Date, currentNav: number): number | null {
     const cashFlows: { amount: number, date: Date }[] = [];
@@ -180,30 +248,19 @@ export class DiversifyShortedPage implements OnInit {
     let totalUnits = 0;
     let dateIter = new Date(startDate);
 
-    // We assume SIP on the same day of the month as startDate
-    // If data is missing for that day, use the closest previous data point
-    // Iterate monthly
     while (dateIter < endDate) {
-      // Find NAV for dateIter
-      // Data is descending. We need closest date <= dateIter.
-      // Since we are moving forward in time, we can optimize or just linear search usually fast enough
       const record = data.find(d => d.date <= dateIter);
-
       if (record) {
         const nav = record.nav;
         const units = sipAmount / nav;
         totalUnits += units;
         cashFlows.push({ amount: -sipAmount, date: new Date(dateIter) });
       }
-
-      // Increment month
       dateIter.setMonth(dateIter.getMonth() + 1);
     }
 
-    // If no cashflows, return null
     if (cashFlows.length === 0) return null;
 
-    // Final Value
     const finalValue = totalUnits * currentNav;
     cashFlows.push({ amount: finalValue, date: endDate });
 
@@ -216,7 +273,6 @@ export class DiversifyShortedPage implements OnInit {
     const tolerance = 1e-6;
     let rate = guess;
 
-    // Normalize dates to fraction of years from first date
     const firstDate = cashFlows[0].date;
     const flows = cashFlows.map(cf => ({
       amount: cf.amount,
@@ -234,10 +290,10 @@ export class DiversifyShortedPage implements OnInit {
       }
 
       if (Math.abs(npv) < tolerance) {
-        return rate * 100; // Return percentage
+        return rate * 100;
       }
 
-      if (Math.abs(d_npv) < 1e-10) break; // Avoid division by zero
+      if (Math.abs(d_npv) < 1e-10) break;
 
       const newRate = rate - npv / d_npv;
       if (!isFinite(newRate)) break;
