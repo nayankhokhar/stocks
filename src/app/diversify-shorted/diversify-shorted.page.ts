@@ -148,13 +148,20 @@ export class DiversifyShortedPage implements OnInit {
       // Generate monthly dates from targetDate to currentDate
       const xirrVal = this.calculateSIPXIRR(processedData, targetDate, currentDate, currentNav);
 
+      const formatDate = (date: Date) => {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+      };
+
       return {
         cagr: cagrVal.toFixed(2) + '%',
         avg: avgVal.toFixed(2) + '%',
         xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A',
         abs: absReturn.toFixed(2) + '%',
-        startNav: '₹' + record.nav.toFixed(2),
-        endNav: '₹' + currentNav.toFixed(2)
+        startNav: '₹' + record.nav.toFixed(2) + ' (' + formatDate(record.date) + ')',
+        endNav: '₹' + currentNav.toFixed(2) + ' (' + formatDate(currentDate) + ')'
       };
     };
 

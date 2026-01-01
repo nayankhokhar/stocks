@@ -69,7 +69,7 @@ ion-content {
       th {
         padding: 16px;
         text-align: left;
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 600;
         color: #8898aa;
         text-transform: uppercase;
@@ -94,7 +94,7 @@ ion-content {
           padding: 14px 16px;
           border-bottom: 1px solid #f0f0f0;
           color: #333;
-          font-size: 14px;
+          font-size: 16px;
           vertical-align: middle;
 
           &.return-cell {
@@ -121,9 +121,9 @@ ion-content {
             .metric-row {
               display: flex;
               justify-content: space-between;
-              font-size: 13px;
-              margin-bottom: 4px;
-              gap: 8px;
+              font-size: 15px;
+              margin-bottom: 6px;
+              gap: 12px;
 
               .label {
                 color: #8898aa;
@@ -133,6 +133,7 @@ ion-content {
               .value {
                 font-family: 'Consolas', 'Monaco', monospace;
                 font-weight: 600;
+                white-space: nowrap;
 
                 &.positive {
                   color: #2dce89;
@@ -147,7 +148,7 @@ ion-content {
 
           &.meta-cell {
             color: #525f7f;
-            font-size: 13px;
+            font-size: 15px;
             vertical-align: top;
             padding-top: 14px;
           }
@@ -165,7 +166,7 @@ ion-content {
             }
 
             .fund-category {
-              font-size: 11px;
+              font-size: 13px;
               color: #8898aa;
               text-transform: uppercase;
               letter-spacing: 0.5px;
