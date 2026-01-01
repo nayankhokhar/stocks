@@ -1,0 +1,209 @@
+ion-content {
+  --background: #f4f5f8;
+}
+
+.header-section {
+  padding: 16px;
+  margin-bottom: 10px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0 0;
+  }
+}
+
+.filter-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: white;
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+
+    ion-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    ion-select {
+      font-weight: 600;
+      color: #1a1a2e;
+      --placeholder-color: #1a1a2e;
+    }
+  }
+}
+
+.data-section {
+  padding: 0 16px 30px;
+}
+
+.table-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin: 0;
+  overflow: hidden;
+  background: white;
+}
+
+.table-container {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: #f9fafc;
+
+      th {
+        padding: 16px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: #8898aa;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+    }
+
+    tbody {
+      tr {
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #f9f9f9;
+        }
+
+        &:last-child td {
+          border-bottom: none;
+        }
+
+        td {
+          padding: 14px 16px;
+          border-bottom: 1px solid #f0f0f0;
+          color: #333;
+          font-size: 14px;
+          vertical-align: middle;
+
+          &.return-cell {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+
+            &.positive {
+              color: #2dce89;
+            }
+
+            &.negative {
+              color: #f5365c;
+            }
+
+            &.bold-return {
+              font-weight: 700;
+            }
+          }
+
+          &.metrics-cell {
+            padding: 10px 16px;
+            vertical-align: top;
+
+            .metric-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 13px;
+              margin-bottom: 4px;
+              gap: 8px;
+
+              .label {
+                color: #8898aa;
+                font-weight: 500;
+              }
+
+              .value {
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-weight: 600;
+
+                &.positive {
+                  color: #2dce89;
+                }
+
+                &.negative {
+                  color: #f5365c;
+                }
+              }
+            }
+          }
+
+          &.meta-cell {
+            color: #525f7f;
+            font-size: 13px;
+            vertical-align: top;
+            padding-top: 14px;
+          }
+
+          &.fund-name-cell {
+            min-width: 180px;
+            vertical-align: top;
+            padding-top: 14px;
+
+            .fund-name {
+              font-weight: 600;
+              color: #1a1a2e;
+              margin-bottom: 4px;
+              white-space: normal;
+            }
+
+            .fund-category {
+              font-size: 11px;
+              color: #8898aa;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              display: inline-block;
+              background: #f0f2f5;
+              padding: 2px 6px;
+              border-radius: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.loading-container,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  ion-spinner {
+    transform: scale(1.5);
+    margin-bottom: 20px;
+  }
+
+  ion-icon {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #888;
+    font-size: 16px;
+    margin: 0;
+  }
+}

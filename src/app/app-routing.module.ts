@@ -30,7 +30,11 @@ const routes: Routes = [
   {
     path: 'mutual-fund',
     loadChildren: () => import('./mutual-fund/mutual-fund.module').then( m => m.MutualFundPageModule)
+  },  {
+    path: 'diversify-shorted',
+    loadChildren: () => import('./diversify-shorted/diversify-shorted.module').then( m => m.DiversifyShortedPageModule)
   },
+
 ];
 
 @NgModule({
