@@ -7,6 +7,9 @@ interface ReturnMetrics {
   cagr: string;
   avg: string;
   xirr: string;
+  abs: string;
+  startNav: string;
+  endNav: string;
 }
 
 interface MutualFund {
@@ -60,10 +63,10 @@ export class DiversifyShortedPage implements OnInit {
             name: res.meta ? res.meta.scheme_name : fund.name,
             meta: res.meta,
             performance: { // Initialize with empty defaults
-              oneYear: { cagr: '-', avg: '-', xirr: '-' },
-              threeYear: { cagr: '-', avg: '-', xirr: '-' },
-              fiveYear: { cagr: '-', avg: '-', xirr: '-' },
-              total: { cagr: '-', avg: '-', xirr: '-' }
+              oneYear: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' },
+              threeYear: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' },
+              fiveYear: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' },
+              total: { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-' }
             }
           };
 
@@ -130,7 +133,7 @@ export class DiversifyShortedPage implements OnInit {
       // Since list is descending, we search from start until we find date <= target
       const record = processedData.find(d => d.date <= targetDate);
 
-      if (!record || periodYears <= 0) return { cagr: 'N/A', avg: 'N/A', xirr: 'N/A' };
+      if (!record || periodYears <= 0) return { cagr: 'N/A', avg: 'N/A', xirr: 'N/A', abs: 'N/A', startNav: 'N/A', endNav: 'N/A' };
 
       // 1. CAGR (Annual Return) -> Point to Point
       // Formula: (Current/Old)^(1/n) - 1
@@ -148,7 +151,10 @@ export class DiversifyShortedPage implements OnInit {
       return {
         cagr: cagrVal.toFixed(2) + '%',
         avg: avgVal.toFixed(2) + '%',
-        xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A'
+        xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A',
+        abs: absReturn.toFixed(2) + '%',
+        startNav: '₹' + record.nav.toFixed(2),
+        endNav: '₹' + currentNav.toFixed(2)
       };
     };
 
