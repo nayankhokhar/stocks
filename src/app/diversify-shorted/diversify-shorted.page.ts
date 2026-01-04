@@ -9,6 +9,7 @@ interface SipMetrics {
   gain: string;
   return: string;
   xirr: string;
+  avg: string;
 }
 
 interface ReturnMetrics {
@@ -49,7 +50,12 @@ export class DiversifyShortedPage implements OnInit {
     // { code: '120828', name: 'Quant Active Fund', expenseRatio: '0.58%', exitLoad: 'Nil' },
     // { code: '120465', name: 'Nippon India Small Cap Fund', expenseRatio: '0.70%', exitLoad: '1% for < 30 days' },
     // { code: '119063', name: 'SBI Nifty 50 ETF', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '120586', name: 'ICICI Prudential Large Cap Fund', expenseRatio: '0.07%', exitLoad: 'Nil' }
+    { code: '120621', name: 'ICICI Prudential Infrastructure Fund - Direct Plan - Growth', expenseRatio: '0.07%', exitLoad: 'Nil' },
+    { code: '120586', name: 'ICICI Prudential Large Cap Fund', expenseRatio: '0.07%', exitLoad: 'Nil' },
+    { code: '120821', name: 'quant Multi Asset Allocation Fund-GROWTH OPTION-Direct Plan', expenseRatio: '0.07%', exitLoad: 'Nil' },
+    { code: '147662', name: 'ICICI Prudential Commodities Fund - Direct Plan - Growth Option', expenseRatio: '0.07%', exitLoad: 'Nil' },
+    { code: '129188', name: 'Invesco India - Invesco Global Equity Income Fund of Fund - Direct Plan - Growth', expenseRatio: '0.07%', exitLoad: 'Nil' },
+    { code: '119723', name: 'SBI ELSS Tax Saver FUND - DIRECT PLAN -GROWTH', expenseRatio: '0.07%', exitLoad: 'Nil' }
   ];
 
   allFundsData: MutualFund[] = [];
@@ -103,7 +109,7 @@ export class DiversifyShortedPage implements OnInit {
   }
 
   getEmptyMetrics(): ReturnMetrics {
-    const emptySip = { investment: '-', value: '-', gain: '-', return: '-', xirr: '-' };
+    const emptySip = { investment: '-', value: '-', gain: '-', return: '-', xirr: '-', avg: '-' };
     return { cagr: '-', avg: '-', xirr: '-', abs: '-', startNav: '-', endNav: '-', dailySip: emptySip, monthlySip: emptySip };
   }
 
@@ -229,6 +235,10 @@ export class DiversifyShortedPage implements OnInit {
     const xirrFlows = [...cashFlows, { amount: currentValue, date: endDate }];
     const xirrVal = this.computeXIRR(xirrFlows);
 
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const durationInYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+    const avgReturn = durationInYears > 0 ? absReturn / durationInYears : 0;
+
     // Formatting helper
     const fmt = (num: number) => '₹' + Math.round(num).toLocaleString('en-IN');
 
@@ -237,7 +247,8 @@ export class DiversifyShortedPage implements OnInit {
       value: fmt(currentValue),
       gain: fmt(gain),
       return: absReturn.toFixed(2) + '%',
-      xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A'
+      xirr: xirrVal !== null ? xirrVal.toFixed(2) + '%' : 'N/A',
+      avg: avgReturn.toFixed(2) + '%'
     };
   }
 
