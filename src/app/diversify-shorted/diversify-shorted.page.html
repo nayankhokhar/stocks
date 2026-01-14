@@ -4,6 +4,9 @@
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title>Diversify Shorted</ion-title>
+    <ion-buttons slot="end">
+      <ion-toggle [(ngModel)]="showSimpleTable" color="secondary"></ion-toggle>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -14,7 +17,7 @@
   </div>
 
   <div class="data-section" *ngIf="!isLoading && allFundsData.length > 0">
-    <ion-card class="table-card">
+    <ion-card class="table-card" *ngIf="!showSimpleTable">
       <div class="table-container">
         <table>
           <thead>
@@ -24,6 +27,7 @@
               <th class="period-header">3 Year</th>
               <th class="period-header">5 Year</th>
               <th class="period-header">Since Inception</th>
+              <th rowspan="2">Yearly Returns</th>
             </tr>
             <tr class="sub-header-row">
               <!-- Sub-headers visually represented in content or just one header per block -->
@@ -438,6 +442,49 @@
                 </div>
               </td>
 
+              <!-- Yearly Returns -->
+              <td class="metrics-cell">
+                <div class="yearly-returns-container">
+                  <div class="metric-block" *ngFor="let yearData of fund.yearlyReturns" style="margin-bottom: 8px;">
+                    <div class="metric-row">
+                      <span class="label">{{ yearData.year }}:</span>
+                      <span class="value" [class.positive]="parseFloat(yearData.return) > 0"
+                        [class.negative]="parseFloat(yearData.return) < 0">
+                        {{ yearData.return }} <span style="color: black;">{{ yearData.startNav }} - {{ yearData.endNav
+                          }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ion-card>
+
+    <ion-card class="table-card" *ngIf="showSimpleTable">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fund Name</th>
+              <th class="ion-text-end">Fund Size</th>
+              <th class="ion-text-end">Expense Ratio</th>
+              <th class="ion-text-end">Exit Load</th>
+              <th class="ion-text-end">Min Investment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fund of allFundsData">
+              <td class="fund-name-cell">
+                <div class="fund-name">{{ fund.name }}</div>
+                <div class="fund-category" *ngIf="fund.meta">{{ fund.meta.scheme_category }}</div>
+              </td>
+              <td class="ion-text-end">{{ fund.funSize }}</td>
+              <td class="ion-text-end">{{ fund.expenseRatio }}</td>
+              <td class="ion-text-end">{{ fund.exitLoad }}</td>
+              <td class="ion-text-end">{{ fund.minInvestment }}</td>
             </tr>
           </tbody>
         </table>

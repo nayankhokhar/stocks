@@ -33,7 +33,7 @@ export class StocksPage implements OnInit {
     }).subscribe((resp) => {
       this.searchStocksData = resp;
       this.filteredSearchStocksData = resp; // Initialize filtered list
-      console.log("resp: ",resp);
+      console.log("resp: ", resp);
     });
   }
 
@@ -50,7 +50,7 @@ export class StocksPage implements OnInit {
   filterStocks(event: any) {
     const searchTerm = event.detail.value || '';
     this.searchTerm = searchTerm;
-    
+
     if (!searchTerm || searchTerm.trim() === '') {
       this.filteredSearchStocksData = this.searchStocksData;
       this.showDropdown = false;
@@ -86,12 +86,13 @@ export class StocksPage implements OnInit {
 
     // Convert selectedStocks array to string array of names
     this.selectedStocksReq = this.selectedStocks.map(stock => stock['_id']);
-    
+
     this.http.post<any[]>("http://localhost:8888/getStocksData", {
       sector: this.selectedSectors,
       id: this.selectedStocksReq
     }).subscribe((resp) => {
       this.stocks = _.orderBy(resp, ['totalGreenCount'], ['desc']);
+      console.log(this.stocks);
     });
   }
 

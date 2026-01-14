@@ -4,37 +4,22 @@
       <div class="w-100" style="position: relative;">
         <ion-list class="w-100">
           <ion-item>
-            <ion-input 
-              type="text" 
-              placeholder="Type to search stocks..." 
-              [(ngModel)]="searchTerm"
-              (ionInput)="filterStocks($event)"
-              (ionFocus)="showDropdown = true"
-              (ionBlur)="onInputBlur()"
+            <ion-input type="text" placeholder="Type to search stocks..." [(ngModel)]="searchTerm"
+              (ionInput)="filterStocks($event)" (ionFocus)="showDropdown = true" (ionBlur)="onInputBlur()"
               clearInput="true">
             </ion-input>
           </ion-item>
         </ion-list>
-        
+
         <!-- Dropdown list - positioned below input -->
-        <div *ngIf="showDropdown && filteredSearchStocksData.length > 0" 
-             class="dropdown-list"
-             style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <div *ngIf="showDropdown && filteredSearchStocksData.length > 0" class="dropdown-list"
+          style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
           <ion-list>
-            <ion-item 
-              *ngFor="let sector of filteredSearchStocksData" 
-              button
-              (click)="selectStock(sector, $event)"
-              [class.item-selected]="isSelected(sector)"
-              lines="none"
-              detail="false"
+            <ion-item *ngFor="let sector of filteredSearchStocksData" button (click)="selectStock(sector, $event)"
+              [class.item-selected]="isSelected(sector)" lines="none" detail="false"
               style="cursor: pointer; --background-hover: var(--ion-color-light, #f4f5f8); --background-activated: var(--ion-color-light, #f4f5f8); --padding-start: 16px; --padding-end: 16px; --min-height: 48px;">
               <ion-label style="font-size: 16px;">{{ sector.name }}</ion-label>
-              <ion-icon 
-                *ngIf="isSelected(sector)" 
-                name="checkmark" 
-                slot="end"
-                color="primary"
+              <ion-icon *ngIf="isSelected(sector)" name="checkmark" slot="end" color="primary"
                 style="font-size: 20px; margin-left: 8px;">
               </ion-icon>
             </ion-item>
@@ -68,6 +53,11 @@
             <th scope="col" class="text-end">Market Cap</th>
             <th scope="col" class="text-end">52-WH</th>
             <th scope="col" class="text-end">52-WL</th>
+            <th scope="col" class="text-end">5DayAvg</th>
+            <th scope="col" class="text-end">30DayAvg</th>
+            <th scope="col" class="text-end">50DayAvg</th>
+            <th scope="col" class="text-end">150DayAvg</th>
+            <th scope="col" class="text-end">200DayAvg</th>
             <th scope="col" class="text-end">PE</th>
             <th scope="col" class="text-end">PB</th>
             <th scope="col" class="text-end">Book Value</th>
@@ -95,6 +85,11 @@
                 / {{data.last52WeekHighPer }}</td>
               <td class="text-end" style="color: green;">{{ formatIndianCurrency(data.last52WeekLow) }}
                 / {{data.last52WeekLowPer }}</td>
+              <td class="text-end">{{data.avg5Day }}</td>
+              <td class="text-end">{{data.avg30Day }}</td>
+              <td class="text-end">{{data.avg50Day }}</td>
+              <td class="text-end">{{data.avg150Day }}</td>
+              <td class="text-end">{{data.avg200Day }}</td>
               <td class="text-end">
                 <span [ngStyle]="{'color': data.peRatio < data.industryPeRatio ? 'green' : 'red'}">
                   {{ formatIndianCurrency(data.peRatio) }}

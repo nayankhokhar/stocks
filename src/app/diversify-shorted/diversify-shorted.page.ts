@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs'; // 'of' might be useful if I decide to use of(null)
+import { map, catchError } from 'rxjs/operators';
 
 interface SipMetrics {
   investment: string;
@@ -23,9 +23,17 @@ interface ReturnMetrics {
   monthlySip: SipMetrics;
 }
 
+interface YearlyReturn {
+  year: number;
+  return: string;
+  startNav: string;
+  endNav: string;
+}
+
 interface MutualFund {
   code: string;
   name: string;
+  otherDetails?: string;
   expenseRatio?: string;
   exitLoad?: string;
   meta?: any;
@@ -35,6 +43,13 @@ interface MutualFund {
     fiveYear: ReturnMetrics;
     total: ReturnMetrics;
   };
+  yearlyReturns?: YearlyReturn[];
+  otherDetailsLink?: any;
+  currentNav?: number;
+  minInvestment?: any;
+  funSize?: any;
+  lumpsum?: any;
+
 }
 
 @Component({
@@ -46,20 +61,80 @@ interface MutualFund {
 export class DiversifyShortedPage implements OnInit {
 
   bestFunds: MutualFund[] = [
-    // { code: '122639', name: 'Parag Parikh Flexi Cap Fund', expenseRatio: '0.66%', exitLoad: '2% for < 365 days' },
-    // { code: '120828', name: 'Quant Active Fund', expenseRatio: '0.58%', exitLoad: 'Nil' },
-    // { code: '120465', name: 'Nippon India Small Cap Fund', expenseRatio: '0.70%', exitLoad: '1% for < 30 days' },
-    // { code: '119063', name: 'SBI Nifty 50 ETF', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '120621', name: 'ICICI Prudential Infrastructure Fund - Direct Plan - Growth', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '120586', name: 'ICICI Prudential Large Cap Fund', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '120821', name: 'quant Multi Asset Allocation Fund-GROWTH OPTION-Direct Plan', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '147662', name: 'ICICI Prudential Commodities Fund - Direct Plan - Growth Option', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '129188', name: 'Invesco India - Invesco Global Equity Income Fund of Fund - Direct Plan - Growth', expenseRatio: '0.07%', exitLoad: 'Nil' },
-    { code: '119723', name: 'SBI ELSS Tax Saver FUND - DIRECT PLAN -GROWTH', expenseRatio: '0.07%', exitLoad: 'Nil' }
+    // { code: '120586', name: 'ICICI Prudential Large Cap Fund' },
+    // { code: '118825', name: 'Mirae Asset Large Cap Fund' },
+    // { code: '146549', name: 'Mahindra Manulife Large Cap Fund' },
+
+    //Small Cap Funds
+    // {
+    //   "code": "118778",
+    //   "name": "Nippon India Small Cap Fund",
+    //   "expenseRatio": "0.66%",
+    //   "exitLoad": "1% within 1 year",
+    //   "minInvestment": "100 Sip, No Lumpsum",
+    //   "funSize": "68,287"
+    // },
+    // {
+    //   "code": "130503",
+    //   "name": "HDFC Small Cap Fund",
+    //   "expenseRatio": "0.67%",
+    //   "exitLoad": "1% within 1 year",
+    //   "minInvestment": "100 Sip, 100,100 Lumpsum",
+    //   "funSize": "37,753"
+    // },
+    // {
+    //   "code": "120828",
+    //   "name": "Quant Small Cap Fund",
+    //   "expenseRatio": "0.78%",
+    //   "exitLoad": "1% within 1 year",
+    //   "minInvestment": "1000 Sip, 5000,1000 Lumpsum",
+    //   "funSize": "29,784"
+    // },
+    // {
+    //   "code": '145206',
+    //   "name": 'Tata Small Cap Fund',
+    //   "expenseRatio": "0.33%",
+    //   "exitLoad": "0.50% within 30 days",
+    //   "minInvestment": "100 Sip, No Lumpsum",
+    //   "funSize": "11,324"
+    // },
+
+    //Flexi Cap Funds
+    {
+      "code": "122639",
+      "name": "Parag Parikh Flexi Cap Fund",
+      "expenseRatio": "0.63%",
+      "exitLoad": "2% within 1 year",
+      "minInvestment": "1000 Sip, 1000,1000 Lumpsum",
+      "funSize": "1,33,208"
+    },
+    {
+      "code": "101762",
+      "name": "HDFC Flexi Cap Fund",
+      "expenseRatio": "0.65%",
+      "exitLoad": "1% within 1 year",
+      "minInvestment": "100 Sip, 100,100 Lumpsum",
+      "funSize": "96,294"
+    },
+    {
+      "code": "148989",
+      "name": "ICICI Prudential Flexi Cap Fund",
+      "expenseRatio": "0.79%",
+      "exitLoad": "1% within 1 year",
+      "minInvestment": "100 Sip, 5000,1000 Lumpsum",
+      "funSize": "20,135"
+    }
+
+    // { code: '120621', name: 'ICICI Prudential Infrastructure Fund - Direct Plan - Growth' },
+    // { code: '120821', name: 'quant Multi Asset Allocation Fund-GROWTH OPTION-Direct Plan' },
+    // { code: '147662', name: 'ICICI Prudential Commodities Fund - Direct Plan - Growth Option' },
+    // { code: '129188', name: 'Invesco India - Invesco Global Equity Income Fund of Fund - Direct Plan - Growth' },
+    // { code: '119723', name: 'SBI ELSS Tax Saver FUND - DIRECT PLAN -GROWTH' }
   ];
 
   allFundsData: MutualFund[] = [];
   isLoading = false;
+  showSimpleTable = false;
 
   constructor(private http: HttpClient) { }
 
@@ -72,19 +147,26 @@ export class DiversifyShortedPage implements OnInit {
     this.allFundsData = [];
 
     const requests = this.bestFunds.map(fund => {
-      const url = `https://api.mfapi.in/mf/${fund.code}`;
-      return this.http.get<any>(url).pipe(
-        map(res => {
+      const mfApiUrl = `https://api.mfapi.in/mf/${fund.code}`;
+      const mfReq = this.http.get<any>(mfApiUrl);
+
+      return forkJoin([mfReq]).pipe(
+        map(([res]) => {
+          let extraDetails = { expenseRatio: fund.expenseRatio || '-', exitLoad: fund.exitLoad || '-', category: fund.meta ? fund.meta.scheme_category : '-' };
+
           const processedFund: MutualFund = {
             ...fund,
-            name: res.meta ? res.meta.scheme_name : fund.name,
+            // name: res.meta ? res.meta.scheme_name : fund.name,
             meta: res.meta,
-            performance: { // Initialize with empty defaults
+            expenseRatio: extraDetails.expenseRatio,
+            exitLoad: extraDetails.exitLoad,
+            performance: {
               oneYear: this.getEmptyMetrics(),
               threeYear: this.getEmptyMetrics(),
               fiveYear: this.getEmptyMetrics(),
               total: this.getEmptyMetrics()
-            }
+            },
+            yearlyReturns: []
           };
 
           if (res.data && res.data.length > 0) {
@@ -99,6 +181,7 @@ export class DiversifyShortedPage implements OnInit {
     forkJoin(requests).subscribe({
       next: (results) => {
         this.allFundsData = results;
+        console.log(this.allFundsData);
         this.isLoading = false;
       },
       error: (err) => {
@@ -131,6 +214,7 @@ export class DiversifyShortedPage implements OnInit {
     const currentRecord = processedData[0];
     const currentNav = currentRecord.nav;
     const currentDate = currentRecord.date;
+    fund.currentNav = currentNav;
 
     const calcForPeriod = (years: number | 'total'): ReturnMetrics => {
       let targetDate: Date;
@@ -194,7 +278,54 @@ export class DiversifyShortedPage implements OnInit {
       fund.performance.threeYear = calcForPeriod(3);
       fund.performance.fiveYear = calcForPeriod(5);
       fund.performance.total = calcForPeriod('total');
+      fund.performance.threeYear = calcForPeriod(3);
+      fund.performance.fiveYear = calcForPeriod(5);
+      fund.performance.total = calcForPeriod('total');
     }
+
+    fund.yearlyReturns = this.calculateYearlyReturns(processedData);
+  }
+
+  calculateYearlyReturns(processedData: any[]): YearlyReturn[] {
+    // Data is descending: Newest [0] -> Oldest [N]
+    if (!processedData || processedData.length === 0) return [];
+
+    const years = [...new Set(processedData.map(d => d.date.getFullYear()))]; // unique years found
+    // default sort is ascending? Set iteration order is insertion order? 
+    // Data is descending, so years will be [2026, 2025...] descending.
+
+    const results: YearlyReturn[] = [];
+
+    for (const year of years) {
+      // End price for the year: Latest date in that year
+      // Since processedData is descending, first record with that year is the latest
+      const endRecord = processedData.find(d => d.date.getFullYear() === year);
+
+      // Start price for the year: 
+      // Ideally: Close price of previous year (Latest record of year-1)
+      // If year-1 not found (inception year), use Earliest record of THIS year
+      let startRecord = processedData.find(d => d.date.getFullYear() === year - 1);
+
+      if (!startRecord) {
+        // Inception Year case: find last occurrence of this year (oldest date)
+        // Since we want the oldest, and data is descending, we can use findLast? 
+        // Or reverse find. Array.prototype.reverse().find? Expensive.
+        // Or just filter and take last.
+        const yearRecords = processedData.filter(d => d.date.getFullYear() === year);
+        startRecord = yearRecords[yearRecords.length - 1];
+      }
+
+      if (endRecord && startRecord) {
+        const ret = ((endRecord.nav - startRecord.nav) / startRecord.nav) * 100;
+        results.push({
+          year: year,
+          return: ret.toFixed(2) + '%',
+          startNav: startRecord.nav.toFixed(2),
+          endNav: endRecord.nav.toFixed(2)
+        });
+      }
+    }
+    return results;
   }
 
   calculateSIPValue(data: any[], startDate: Date, endDate: Date, currentNav: number, amount: number, frequency: 'daily' | 'monthly'): SipMetrics {
